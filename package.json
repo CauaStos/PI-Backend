@@ -1,0 +1,32 @@
+{
+  "name": "projetointerdisciplinar",
+  "version": "1.0.0",
+  "description": "PI\r PI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx --watch --env-file=.env src/server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CauaStos/ProjetoInterdisciplinar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/CauaStos/ProjetoInterdisciplinar/issues"
+  },
+  "homepage": "https://github.com/CauaStos/ProjetoInterdisciplinar#readme",
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}
