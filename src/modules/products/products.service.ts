@@ -19,7 +19,7 @@ class productService{
         return product;
     }
 
-    public async get(){
+    public async getProducts(){
         return getProducts();
     }
 

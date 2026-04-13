@@ -4,5 +4,9 @@ import productsController from "./products.controller.js";
 const productRoutes = Router();
 
 productRoutes.post("/", productsController.create);
+productRoutes.get("/", productsController.getProducts);
+productRoutes.get("/:id", productsController.getProductById);
+productRoutes.patch("/:id", productsController.update);
+productRoutes.delete("/:id", productsController.delete);
 
 export default productRoutes;
