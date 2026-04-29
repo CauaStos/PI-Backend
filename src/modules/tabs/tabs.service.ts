@@ -1,7 +1,7 @@
-import Product from "./products.model.js";
+import Product from "./tabs.model.js";
 import type { IProduct, 
     ICreateProductDTO, 
-    IUpdateProductDTO } from "./products.types.js";
+    IUpdateProductDTO } from "./tabs.types.js";
 
 class productService{
     

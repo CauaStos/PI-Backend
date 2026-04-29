@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import productService from "./products.service.js";
-import type { IProduct } from "./products.types.js";
+import productService from "./tabs.service.js";
+import type { IProduct } from "./tabs.types.js";
 
 class ProductController {
 

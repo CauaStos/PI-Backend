@@ -1,21 +1,16 @@
-import mysql from "mysql2/promise";
+import mongoose from "mongoose";
 
-export const pool = mysql.createPool({
-    host: "localhost",
-    user: "root",
-    password: "admin",
-    database: "projeto_karaoke",
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+class Database{
 
-export async function testDatabaseConnection(): Promise<void> {
-  try {
-    const connection = await pool.getConnection();
-    console.log("Database connected successfully.");
-    connection.release();
-  } catch (error) {
-    console.error("Database connection error:", error);
-  }
+    public async connect():Promise<void>{
+        try{
+            await mongoose.connect(process.env.MONGO_URI as string);
+            console.log("Mongo conectado com sucesso");
+        } catch (error){
+            console.log("Erro ao conectar ao MongoBD", error);
+            process.exit(1);
+        }
+    }
 }
+
+export default new Database();
