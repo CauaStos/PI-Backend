@@ -1,38 +1,39 @@
-import Product from "./orders.model.js";
-import type { IProduct, 
-    ICreateProductDTO, 
-    IUpdateProductDTO } from "./orders.types.js";
+import Order from "./orders.model.js";
+import type {
+    ICreateOrderDTO,
+    IUpdateOrderDTO
+} from "./orders.types.js";
 
-class productService{
-    
-    public async create(data: ICreateProductDTO){
-        const product = await Product.create({
-            name: data.name,
-            value: data.value,
-            description: data.description ?? ""
+class OrderService {
+
+    public async create(data: ICreateOrderDTO) {
+        const order = await Order.create({
+            products: data.products,
+            total: data.total,
+            status: data.status
         });
-        return product;
+
+        return order;
     }
 
-    public async get(){
-        return Product.find();
-    }
-    
-    public async getById(id: number){
-        return Product.findById(id);
+    public async get() {
+        return Order.find();
     }
 
-    public async update(id: number, data: IUpdateProductDTO){
+    public async getById(id: string) {
+        return Order.findById(id);
+    }
 
-        return await Product.findByIdAndUpdate(id, data, {
+    public async update(id: string, data: IUpdateOrderDTO) {
+        return Order.findByIdAndUpdate(id, data, {
             new: true,
-            runValidators: true,
+            runValidators: true
         });
     }
 
-    public async delete(id: number){
-        Product.findByIdAndDelete(id);
+    public async delete(id: string) {
+        return Order.findByIdAndDelete(id);
     }
 }
 
-export default new productService(); 
+export default new OrderService();

@@ -32,14 +32,14 @@ class ProductController {
             })
         }
 
-        return response.json(200).json(product);
+        return response.status(200).json(product);
     }
 
     public async update(request: Request, response: Response): Promise<Response>{
         const { id } = request.params;
         const {name, value, description} = request.body;
         
-        const originalProduct = productService.getById(Number(id));
+        const originalProduct = await productService.getById(Number(id));
 
         if(!originalProduct || originalProduct === null){
             return response.status(404).json({

@@ -1,21 +1,30 @@
-export interface IProduct {
+import type { Types } from "mongoose";
+
+export interface IOrderProduct {
+    product: Types.ObjectId;
+    name: string;
+    value: number;
+    quantity: number;
+}
+
+export interface IOrder {
     id?: number,
-    name: string,
-    value: number,
-    description: string,
-    createAt?: string,
-    updateAt?: string,
-    timestamp: boolean
+    products: IOrderProduct[];
+    total: number;
+    status: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
-export interface ICreateProductDTO{
-    name: string,
-    value: number,
-    description?: string
+export interface ICreateOrderDTO{
+    products: IOrderProduct[];
+    total: number;
+    status: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
-export interface IUpdateProductDTO{
-    name?: string,
-    value?: number,
-    description?: string
+export interface IUpdateOrderDTO{
+    products?: IOrderProduct[];
+    status?: string;
 }

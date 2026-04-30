@@ -1,70 +1,93 @@
 import type { Request, Response } from "express";
-import productService from "./orders.service.js";
-import type { IProduct } from "./orders.types.js";
+import orderService from "./orders.service.js";
 
-class ProductController {
+class OrderController {
 
-    public async create(request: Request, response: Response): Promise<Response>{
-        const {name, value, description} = request.body;
-        
-        const product = await productService.create({
-            name,
-            value,
-            description
+    public async create(request: Request, response: Response): Promise<Response> {
+        const { products, total, status } = request.body;
+
+        const order = await orderService.create({
+            products,
+            total,
+            status
         });
-        return response.status(201).json(product);
+
+        return response.status(201).json(order);
     }
 
-    public async getProducts(request: Request, response: Response): Promise<Response>{
-        const products = await productService.get();
+    public async getOrders(request: Request, response: Response): Promise<Response> {
+        const orders = await orderService.get();
 
-        return response.status(200).json(products);
+        return response.status(200).json(orders);
     }
 
-    public async getProductById(request: Request, response: Response): Promise<Response>{
-        const {id} = request.params;
-
-        const product = await productService.getById(Number(id));
-
-        if(!product || product === null){
-            return response.status(404).json({
-                "message" : "Product not found"
-            })
-        }
-
-        return response.json(200).json(product);
-    }
-
-    public async update(request: Request, response: Response): Promise<Response>{
+    public async getOrderById(request: Request, response: Response): Promise<Response> {
         const { id } = request.params;
-        const {name, value, description} = request.body;
+        if (!id || Array.isArray(id)) {
+            return response.status(400).json({
+                message: "Invalid order id"
+            });
+        }
         
-        const originalProduct = productService.getById(Number(id));
+        const order = await orderService.getById(id);
 
-        if(!originalProduct || originalProduct === null){
+        if (!order) {
             return response.status(404).json({
-                "message": "Product not found"
-            })
+                message: "Order not found"
+            });
         }
 
-        const newProduct = productService.update(Number(id), {name, value, description});
-
-        return response.status(201).json(newProduct);
+        return response.status(200).json(order);
     }
 
-    public async delete(request: Request, response: Response): Promise<Response>{
-        const {id} = request.params;
-        const product = productService.getById(Number(id));
+    public async update(request: Request, response: Response): Promise<Response> {
+        const { id } = request.params;
+        const { products, status } = request.body;
 
-        if(!product || product === null){
-            return response.status(404).json({
-                "message": "Product not found"
-            })
+        if (!id || Array.isArray(id)) {
+            return response.status(400).json({
+                message: "Invalid order id"
+            });
         }
-        productService.delete(Number(id));
 
-        return response.status(204);
+        const originalOrder = await orderService.getById(id);
+
+        if (!originalOrder) {
+            return response.status(404).json({
+                message: "Order not found"
+            });
+        }
+
+        const updatedOrder = await orderService.update(id, {
+            products,
+            status
+        });
+
+        return response.status(200).json(updatedOrder);
     }
+
+    public async delete(request: Request, response: Response): Promise<Response> {
+        const { id } = request.params;
+
+        if (!id || Array.isArray(id)) {
+            return response.status(400).json({
+            message: "Invalid order id"
+        });
+        }
+
+        const order = await orderService.getById(id);
+
+        if (!order) {
+            return response.status(404).json({
+                message: "Order not found"
+            });
+        }
+
+        await orderService.delete(id);
+
+        return response.status(204).send();
+    }
+
 }
 
-export default new ProductController();
+export default new OrderController();
