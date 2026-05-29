@@ -1,26 +1,32 @@
+import cors from "cors";
 import express from "express";
 import type { Express } from "express";
-import cors from "cors";
+import { errorMiddleware } from "./middlewares/error.middleware.js";
 import routes from "./routes.js";
 
-class App{
+class App {
     public server: Express;
 
-    constructor(){
+    constructor() {
         this.server = express();
         this.middleware();
         this.routes();
+        this.errorHandling();
     }
 
-    private middleware():void{
+    private middleware(): void {
         this.server.use(cors());
         this.server.use(express.json());
         this.server.use(express.urlencoded({ extended: true }));
     }
 
-        private routes():void{
+    private routes(): void {
         this.server.use("/api/v1", routes);
+    }
+
+    private errorHandling(): void {
+        this.server.use(errorMiddleware);
     }
 }
 
-export default new App().server
+export default new App().server;
