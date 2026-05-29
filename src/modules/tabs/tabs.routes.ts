@@ -1,12 +1,13 @@
 import { Router } from "express";
+import { asyncHandler } from "../../shared/async-handler.js";
 import tabController from "./tabs.controller.js";
 
 const tabRoutes = Router();
 
-tabRoutes.post("/", tabController.create);
-tabRoutes.get("/", tabController.getTabs);
-tabRoutes.get("/:id", tabController.getTabById);
-tabRoutes.patch("/:id", tabController.update);
-tabRoutes.delete("/:id", tabController.delete);
+tabRoutes.post("/", asyncHandler(tabController.create));
+tabRoutes.get("/", asyncHandler(tabController.getTabs));
+tabRoutes.get("/:id", asyncHandler(tabController.getTabById));
+tabRoutes.patch("/:id", asyncHandler(tabController.update));
+tabRoutes.delete("/:id", asyncHandler(tabController.delete));
 
 export default tabRoutes;
