@@ -1,93 +1,43 @@
 import type { Request, Response } from "express";
+import { AppError } from "../../shared/app-error.js";
 import orderService from "./orders.service.js";
 
 class OrderController {
-
     public async create(request: Request, response: Response): Promise<Response> {
-        const { products, total, status } = request.body;
-
-        const order = await orderService.create({
-            products,
-            total,
-            status
-        });
-
+        const { tab, product, employee, quantity } = request.body;
+        const order = await orderService.create({ tab, product, employee, quantity });
         return response.status(201).json(order);
     }
 
-    public async getOrders(request: Request, response: Response): Promise<Response> {
+    public async getOrders(_request: Request, response: Response): Promise<Response> {
         const orders = await orderService.get();
-
         return response.status(200).json(orders);
     }
 
     public async getOrderById(request: Request, response: Response): Promise<Response> {
         const { id } = request.params;
-        if (!id || Array.isArray(id)) {
-            return response.status(400).json({
-                message: "Invalid order id"
-            });
-        }
-        
-        const order = await orderService.getById(id);
-
-        if (!order) {
-            return response.status(404).json({
-                message: "Order not found"
-            });
-        }
-
+        const order = await orderService.getById(String(id));
+        if (!order) throw new AppError("Pedido nao encontrado.", 404);
         return response.status(200).json(order);
     }
 
     public async update(request: Request, response: Response): Promise<Response> {
         const { id } = request.params;
-        const { products, status } = request.body;
-
-        if (!id || Array.isArray(id)) {
-            return response.status(400).json({
-                message: "Invalid order id"
-            });
-        }
-
-        const originalOrder = await orderService.getById(id);
-
-        if (!originalOrder) {
-            return response.status(404).json({
-                message: "Order not found"
-            });
-        }
-
-        const updatedOrder = await orderService.update(id, {
-            products,
-            status
+        const { product, employee, quantity, status } = request.body;
+        const order = await orderService.update(String(id), {
+            product,
+            employee,
+            quantity,
+            status,
         });
-
-        return response.status(200).json(updatedOrder);
+        return response.status(200).json(order);
     }
 
     public async delete(request: Request, response: Response): Promise<Response> {
         const { id } = request.params;
-
-        if (!id || Array.isArray(id)) {
-            return response.status(400).json({
-            message: "Invalid order id"
-        });
-        }
-
-        const order = await orderService.getById(id);
-
-        if (!order) {
-            return response.status(404).json({
-                message: "Order not found"
-            });
-        }
-
-        await orderService.delete(id);
-
+        await orderService.delete(String(id));
         return response.status(204).send();
     }
-
 }
 
 export default new OrderController();

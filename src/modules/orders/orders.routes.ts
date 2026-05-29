@@ -1,12 +1,13 @@
 import { Router } from "express";
+import { asyncHandler } from "../../shared/async-handler.js";
 import orderController from "./orders.controller.js";
 
 const orderRoutes = Router();
 
-orderRoutes.post("/", orderController.create);
-orderRoutes.get("/", orderController.getOrders);
-orderRoutes.get("/:id", orderController.getOrderById);
-orderRoutes.patch("/:id", orderController.update);
-orderRoutes.delete("/:id", orderController.delete);
+orderRoutes.post("/", asyncHandler(orderController.create));
+orderRoutes.get("/", asyncHandler(orderController.getOrders));
+orderRoutes.get("/:id", asyncHandler(orderController.getOrderById));
+orderRoutes.patch("/:id", asyncHandler(orderController.update));
+orderRoutes.delete("/:id", asyncHandler(orderController.delete));
 
 export default orderRoutes;

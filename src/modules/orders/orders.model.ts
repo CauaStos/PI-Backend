@@ -1,57 +1,75 @@
 import mongoose, { Schema } from "mongoose";
-import type { IOrder, IOrderProduct } from "./orders.types.js";
+import { ORDER_STATUSES, STATUS } from "../../shared/status.js";
+import type { IOrder } from "./orders.types.js";
 
-const orderProductSchema = new Schema<IOrderProduct>(
+const orderSchema = new Schema<IOrder>(
     {
+        tab: {
+            type: Schema.Types.ObjectId,
+            ref: "Tab",
+            required: true,
+        },
         product: {
             type: Schema.Types.ObjectId,
             ref: "Product",
-            required: true
+            required: true,
         },
-        name: {
+        productName: {
             type: String,
             required: true,
-            trim: true
+            trim: true,
         },
-        value: {
+        unitPrice: {
             type: Number,
             required: true,
-            min: 1
+            min: 0,
+        },
+        employee: {
+            type: Schema.Types.ObjectId,
+            ref: "Employee",
+            required: true,
+        },
+        employeeName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        employeeAvatar: {
+            type: String,
+            required: true,
+            trim: true,
         },
         quantity: {
             type: Number,
             required: true,
-            min: 1
-        }
-    },
-    {
-        _id: false
-    }
-);
-
-const orderSchema = new Schema<IOrder>(
-    {
-        products: {
-            type: [orderProductSchema],
-            required: true,
-            validate: {
-                validator: (products: IOrderProduct[]) => products.length > 0,
-                message: "An order must have at least one product"
-            }
-        },
-        total: {
-            type: Number,
-            required: true,
-            min: 1
+            min: 1,
         },
         status: {
             type: String,
-            required: true
-        }
+            enum: ORDER_STATUSES,
+            required: true,
+            default: STATUS.IN_PROGRESS,
+        },
+        orderedAt: {
+            type: Date,
+            required: true,
+            default: Date.now,
+        },
+        deliveredAt: {
+            type: Date,
+            default: null,
+        },
     },
     {
         timestamps: true,
-        versionKey: false
+        versionKey: false,
+        toJSON: {
+            virtuals: true,
+            transform: (_doc, ret: Record<string, unknown>) => {
+                ret["id"] = ret["_id"];
+                delete ret["_id"];
+            },
+        },
     }
 );
 
