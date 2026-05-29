@@ -1,21 +1,23 @@
 export interface IProduct {
-    id?: number,
-    name: string,
-    value: number,
-    description: string,
-    createAt?: string,
-    updateAt?: string,
-    timestamp: boolean
+    name: string;
+    description?: string;
+    /** Preco em unidades menores (inteiro, escala 10^4). Ex.: R$24,90 -> 249000. */
+    price: number;
+    stock: number;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
-export interface ICreateProductDTO{
-    name: string,
-    value: number,
-    description?: string
+export interface ICreateProductDTO {
+    name: string;
+    price: number;
+    description?: string;
+    stock?: number;
 }
 
-export interface IUpdateProductDTO{
-    name?: string,
-    value?: number,
-    description?: string
+export interface IUpdateProductDTO {
+    name?: string;
+    price?: number;
+    description?: string;
+    stock?: number;
 }

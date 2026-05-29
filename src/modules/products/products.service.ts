@@ -1,38 +1,58 @@
+import { AppError } from "../../shared/app-error.js";
+import { isValidMoney } from "../../shared/money.js";
 import Product from "./products.model.js";
-import type { IProduct, 
-    ICreateProductDTO, 
-    IUpdateProductDTO } from "./products.types.js";
+import type { ICreateProductDTO, IUpdateProductDTO } from "./products.types.js";
 
-class productService{
-    
-    public async create(data: ICreateProductDTO){
-        const product = await Product.create({
-            name: data.name,
-            value: data.value,
-            description: data.description ?? ""
+class ProductService {
+    public async create(data: ICreateProductDTO) {
+        const name = data.name?.trim();
+        if (!name) {
+            throw new AppError("Nome do produto e obrigatorio.");
+        }
+        if (!isValidMoney(data.price)) {
+            throw new AppError(
+                "Preco invalido. Use um inteiro em unidades menores (escala 10^4)."
+            );
+        }
+
+        return Product.create({
+            name,
+            price: data.price,
+            description: data.description ?? "",
+            stock: data.stock ?? 0,
         });
-        return product;
     }
 
-    public async get(){
-        return Product.find();
+    public async get() {
+        return Product.find().sort({ createdAt: 1 });
     }
-    
-    public async getById(id: number){
+
+    public async getById(id: string) {
         return Product.findById(id);
     }
 
-    public async update(id: number, data: IUpdateProductDTO){
+    public async update(id: string, data: IUpdateProductDTO) {
+        if (data.price !== undefined && !isValidMoney(data.price)) {
+            throw new AppError("Preco invalido.");
+        }
 
-        return await Product.findByIdAndUpdate(id, data, {
+        const product = await Product.findByIdAndUpdate(id, data, {
             new: true,
             runValidators: true,
         });
+        if (!product) {
+            throw new AppError("Produto nao encontrado.", 404);
+        }
+        return product;
     }
 
-    public async delete(id: number){
-        Product.findByIdAndDelete(id);
+    public async delete(id: string) {
+        const product = await Product.findByIdAndDelete(id);
+        if (!product) {
+            throw new AppError("Produto nao encontrado.", 404);
+        }
+        return product;
     }
 }
 
-export default new productService(); 
+export default new ProductService();
