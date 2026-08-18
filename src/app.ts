@@ -3,6 +3,8 @@ import express from "express";
 import type { Express } from "express";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import routes from "./routes.js";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./docs/swagger";
 
 class App {
     public server: Express;
@@ -12,6 +14,11 @@ class App {
         this.middleware();
         this.routes();
         this.errorHandling();
+        this.server.use(
+            "/api-docs",
+            swaggerUi.serve,
+            swaggerUi.setup(swaggerSpec)
+        );
     }
 
     private middleware(): void {
