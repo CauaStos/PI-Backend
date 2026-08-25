@@ -74,7 +74,7 @@ productRoutes.get("/", asyncHandler(productsController.getProducts));
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *
  *     responses:
  *       200:
