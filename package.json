@@ -1,14 +1,13 @@
 {
   "name": "projetointerdisciplinar",
   "version": "1.0.0",
-  "description": "PI\r PI",
-  "main": "index.js",
+  "description": "API do Projeto Interdisciplinar",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx --watch --env-file=.env src/server.ts",
+    "dev": "tsx --watch src/server.ts",
     "start": "tsx src/server.ts",
     "seed": "tsx src/seed.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck"
   },
   "repository": {
     "type": "git",
