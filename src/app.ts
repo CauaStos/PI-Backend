@@ -4,7 +4,7 @@ import type { Express } from "express";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import routes from "./routes.js";
 import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./docs/swagger";
+import { swaggerSpec } from "./docs/swagger.js";
 
 class App {
     public server: Express;
