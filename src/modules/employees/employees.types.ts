@@ -3,6 +3,7 @@ export const EMPLOYEE_ROLES = ["admin", "garcom", "cozinha"] as const;
 export type EmployeeRole = (typeof EMPLOYEE_ROLES)[number] & string;
 
 export interface IEmployee {
+    authUserId?: string;
     name: string;
     email: string;
     role: EmployeeRole;
@@ -16,6 +17,8 @@ export interface ICreateEmployeeDTO {
     email: string;
     role?: EmployeeRole;
     avatar?: string;
+    password?: string;
+    headers: Headers;
 }
 
 export interface IUpdateEmployeeDTO {
@@ -23,4 +26,6 @@ export interface IUpdateEmployeeDTO {
     email?: string;
     role?: EmployeeRole;
     avatar?: string;
+    headers: Headers;
+    actorUserId?: string;
 }

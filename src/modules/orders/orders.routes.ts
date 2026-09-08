@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../../shared/async-handler.js";
 import orderController from "./orders.controller.js";
+import { allowKitchenStatusUpdate, requireRoles } from "../auth/auth.middleware.js";
 
 const orderRoutes = Router();
 
@@ -53,7 +54,7 @@ const orderRoutes = Router();
  *       400:
  *         description: Informações inválidas
  */
-orderRoutes.post("/", asyncHandler(orderController.create));
+orderRoutes.post("/", requireRoles("admin", "garcom"), asyncHandler(orderController.create));
 
 /**
  * @openapi
@@ -132,7 +133,7 @@ orderRoutes.get("/:id", asyncHandler(orderController.getOrderById));
  *       404:
  *         description: Pedido não encontrado
  */
-orderRoutes.patch("/:id", asyncHandler(orderController.update));
+orderRoutes.patch("/:id", requireRoles("admin", "garcom", "cozinha"), allowKitchenStatusUpdate, asyncHandler(orderController.update));
 
 /**
  * @openapi
@@ -153,6 +154,6 @@ orderRoutes.patch("/:id", asyncHandler(orderController.update));
  *       404:
  *         description: Pedido não encontrado
  */
-orderRoutes.delete("/:id", asyncHandler(orderController.delete));
+orderRoutes.delete("/:id", requireRoles("admin"), asyncHandler(orderController.delete));
 
 export default orderRoutes;

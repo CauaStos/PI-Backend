@@ -3,6 +3,7 @@ import { EMPLOYEE_ROLES, type IEmployee } from "./employees.types.js";
 
 const employeeSchema = new Schema<IEmployee>(
     {
+        authUserId: { type: String, unique: true, sparse: true },
         name: { type: String, required: true, trim: true },
         email: { type: String, required: true, unique: true, lowercase: true, trim: true },
         role: { type: String, enum: EMPLOYEE_ROLES, required: true, default: "garcom" },

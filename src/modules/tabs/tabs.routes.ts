@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../../shared/async-handler.js";
 import tabController from "./tabs.controller.js";
+import { requireRoles } from "../auth/auth.middleware.js";
 
 const tabRoutes = Router();
 
@@ -33,7 +34,7 @@ const tabRoutes = Router();
  *       400:
  *         description: Informações inválidas
  */
-tabRoutes.post("/", asyncHandler(tabController.create));
+tabRoutes.post("/", requireRoles("admin", "garcom"), asyncHandler(tabController.create));
 
 /**
  * @openapi
@@ -112,7 +113,7 @@ tabRoutes.get("/:id", asyncHandler(tabController.getTabById));
  *       404:
  *         description: Comanda não encontrada
  */
-tabRoutes.patch("/:id", asyncHandler(tabController.update));
+tabRoutes.patch("/:id", requireRoles("admin", "garcom"), asyncHandler(tabController.update));
 
 /**
  * @openapi
@@ -133,6 +134,6 @@ tabRoutes.patch("/:id", asyncHandler(tabController.update));
  *       404:
  *         description: Comanda não encontrada
  */
-tabRoutes.delete("/:id", asyncHandler(tabController.delete));
+tabRoutes.delete("/:id", requireRoles("admin"), asyncHandler(tabController.delete));
 
 export default tabRoutes;

@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "API do Projeto Interdisciplinar",
   "scripts": {
-    "dev": "tsx --watch src/server.ts",
-    "start": "tsx src/server.ts",
+    "dev": "tsx --watch --env-file=.env src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "seed": "tsx src/seed.ts",
+    "bootstrap-admin": "tsx src/bootstrap.ts",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck"
   },
@@ -22,10 +24,13 @@
   },
   "homepage": "https://github.com/CauaStos/ProjetoInterdisciplinar#readme",
   "dependencies": {
+    "@better-auth/mongo-adapter": "^1.7.2",
     "@types/cors": "^2.8.19",
+    "better-auth": "^1.7.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",
     "express": "^5.2.1",
+    "mongodb": "^7.6.0",
     "mongoose": "^9.6.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
