@@ -13,6 +13,11 @@ const productSchema = new Schema<IProduct>(
             trim: true,
             default: "",
         },
+        image: {
+            type: String,
+            trim: true,
+            maxlength: 7_000_000,
+        },
         price: {
             type: Number,
             required: true,

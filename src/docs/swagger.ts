@@ -22,6 +22,7 @@ const options: swaggerJsdoc.Options = {
                         name: { type: "string", example: "Coca-Cola" },
                         price: { type: "number", example: 7.5 },
                         description: { type: "string", example: "Refrigerante Coca-cola" },
+                        image: { type: "string", format: "uri", example: "data:image/png;base64,..." },
                         stock: { type: "integer", example: 10 },
                     },
                 },

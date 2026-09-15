@@ -28,6 +28,10 @@ const productRoutes = Router();
  *               price:
  *                 type: number
  *                 example: 7.5
+ *               image:
+ *                 type: string
+ *                 format: uri
+ *                 description: Imagem em Data URL (opcional)
  *
  *     responses:
  *       201:
