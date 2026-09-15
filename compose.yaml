@@ -1,0 +1,59 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - onstage-mongo:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      MONGO_URI: mongodb://mongo:27017/onstage
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  # Servico de seed (opcional). Popula o banco com dados de demonstracao.
+  # Rode sob demanda:  docker compose run --rm seed
+  seed:
+    build: .
+    profiles: ["seed"]
+    environment:
+      MONGO_URI: mongodb://mongo:27017/onstage
+    command: ["npm", "run", "seed"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  bootstrap-admin:
+    build: .
+    profiles: ["bootstrap"]
+    environment:
+      MONGO_URI: mongodb://mongo:27017/onstage
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-Administrador}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?BOOTSTRAP_ADMIN_EMAIL is required}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?BOOTSTRAP_ADMIN_PASSWORD is required}
+    command: ["npm", "run", "bootstrap-admin"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  onstage-mongo:

@@ -1,20 +1,21 @@
-import type { Request, Response } from "express";
+import type express from "express";
 import { AppError } from "../../shared/app-error.js";
 import employeeService from "./employees.service.js";
+import { fromNodeHeaders } from "better-auth/node";
 
 class EmployeeController {
-    public async create(request: Request, response: Response): Promise<Response> {
-        const { name, email, role, avatar } = request.body;
-        const employee = await employeeService.create({ name, email, role, avatar });
+    public async create(request: express.Request, response: express.Response): Promise<express.Response> {
+        const { name, email, role, avatar, password } = request.body;
+        const employee = await employeeService.create({ name, email, role, avatar, password, headers: fromNodeHeaders(request.headers) });
         return response.status(201).json(employee);
     }
 
-    public async getEmployees(_request: Request, response: Response): Promise<Response> {
+    public async getEmployees(_request: express.Request, response: express.Response): Promise<express.Response> {
         const employees = await employeeService.get();
         return response.status(200).json(employees);
     }
 
-    public async getEmployeeById(request: Request, response: Response): Promise<Response> {
+    public async getEmployeeById(request: express.Request, response: express.Response): Promise<express.Response> {
         const { id } = request.params;
         const employee = await employeeService.getById(String(id));
         if (!employee) {
@@ -23,7 +24,7 @@ class EmployeeController {
         return response.status(200).json(employee);
     }
 
-    public async update(request: Request, response: Response): Promise<Response> {
+    public async update(request: express.Request, response: express.Response): Promise<express.Response> {
         const { id } = request.params;
         const { name, email, role, avatar } = request.body;
         const employee = await employeeService.update(String(id), {
@@ -31,13 +32,18 @@ class EmployeeController {
             email,
             role,
             avatar,
+            headers: fromNodeHeaders(request.headers),
+            actorUserId: request.auth!.userId,
         });
         return response.status(200).json(employee);
     }
 
-    public async delete(request: Request, response: Response): Promise<Response> {
+    public async delete(request: express.Request, response: express.Response): Promise<express.Response> {
         const { id } = request.params;
-        await employeeService.delete(String(id));
+        await employeeService.delete(String(id), {
+            headers: fromNodeHeaders(request.headers),
+            actorUserId: request.auth!.userId,
+        });
         return response.status(204).send();
     }
 }
