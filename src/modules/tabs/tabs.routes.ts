@@ -2,6 +2,9 @@ import { Router } from "express"
 import { asyncHandler } from "../../shared/async-handler.js"
 import tabController from "./tabs.controller.js"
 import { requireRoles } from "../auth/auth.middleware.js"
+import { validate } from "../../shared/validate.js"
+import { idParamSchema } from "../../shared/schemas.js"
+import { createTabSchema, updateTabSchema } from "./tabs.schemas.js"
 
 const tabRoutes = Router()
 
@@ -37,6 +40,7 @@ const tabRoutes = Router()
 tabRoutes.post(
   "/",
   requireRoles("admin", "garcom"),
+  validate({ body: createTabSchema }),
   asyncHandler(tabController.create)
 )
 
@@ -82,7 +86,11 @@ tabRoutes.get("/", asyncHandler(tabController.getTabs))
  *       404:
  *         description: Comanda não encontrada
  */
-tabRoutes.get("/:id", asyncHandler(tabController.getTabById))
+tabRoutes.get(
+  "/:id",
+  validate({ params: idParamSchema }),
+  asyncHandler(tabController.getTabById)
+)
 
 /**
  * @openapi
@@ -120,6 +128,7 @@ tabRoutes.get("/:id", asyncHandler(tabController.getTabById))
 tabRoutes.patch(
   "/:id",
   requireRoles("admin", "garcom"),
+  validate({ body: updateTabSchema, params: idParamSchema }),
   asyncHandler(tabController.update)
 )
 

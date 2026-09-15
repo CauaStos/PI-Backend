@@ -1,6 +1,9 @@
 import { Router } from "express"
 import { asyncHandler } from "../../shared/async-handler.js"
 import orderController from "./orders.controller.js"
+import { validate } from "../../shared/validate.js"
+import { idParamSchema } from "../../shared/schemas.js"
+import { createOrderSchema, updateOrderSchema } from "./orders.schemas.js"
 import {
   allowKitchenStatusUpdate,
   requireRoles,
@@ -60,6 +63,7 @@ const orderRoutes = Router()
 orderRoutes.post(
   "/",
   requireRoles("admin", "garcom"),
+  validate({ body: createOrderSchema }),
   asyncHandler(orderController.create)
 )
 
@@ -105,7 +109,11 @@ orderRoutes.get("/", asyncHandler(orderController.getOrders))
  *       404:
  *         description: Pedido não encontrado
  */
-orderRoutes.get("/:id", asyncHandler(orderController.getOrderById))
+orderRoutes.get(
+  "/:id",
+  validate({ params: idParamSchema }),
+  asyncHandler(orderController.getOrderById)
+)
 
 /**
  * @openapi
@@ -144,6 +152,7 @@ orderRoutes.patch(
   "/:id",
   requireRoles("admin", "garcom", "cozinha"),
   allowKitchenStatusUpdate,
+  validate({ body: updateOrderSchema, params: idParamSchema }),
   asyncHandler(orderController.update)
 )
 
@@ -169,6 +178,7 @@ orderRoutes.patch(
 orderRoutes.delete(
   "/:id",
   requireRoles("admin"),
+  validate({ params: idParamSchema }),
   asyncHandler(orderController.delete)
 )
 

@@ -2,6 +2,9 @@ import { Router } from "express"
 import { asyncHandler } from "../../shared/async-handler.js"
 import productsController from "./products.controller.js"
 import { requireRoles } from "../auth/auth.middleware.js"
+import { validate } from "../../shared/validate.js"
+import { idParamSchema } from "../../shared/schemas.js"
+import { createProductSchema, updateProductSchema } from "./products.schemas.js"
 
 const productRoutes = Router()
 
@@ -48,6 +51,7 @@ const productRoutes = Router()
 productRoutes.post(
   "/",
   requireRoles("admin"),
+  validate({ body: createProductSchema }),
   asyncHandler(productsController.create)
 )
 
@@ -96,7 +100,11 @@ productRoutes.get("/", asyncHandler(productsController.getProducts))
  *       404:
  *         description: Produto não encontrado
  */
-productRoutes.get("/:id", asyncHandler(productsController.getProductById))
+productRoutes.get(
+  "/:id",
+  validate({ params: idParamSchema }),
+  asyncHandler(productsController.getProductById)
+)
 
 /**
  * @openapi
@@ -141,6 +149,7 @@ productRoutes.get("/:id", asyncHandler(productsController.getProductById))
 productRoutes.patch(
   "/:id",
   requireRoles("admin"),
+  validate({ body: updateProductSchema, params: idParamSchema }),
   asyncHandler(productsController.update)
 )
 
