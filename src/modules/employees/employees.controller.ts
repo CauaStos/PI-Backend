@@ -2,6 +2,7 @@ import type express from "express"
 import { AppError } from "../../shared/app-error.js"
 import employeeService from "./employees.service.js"
 import { fromNodeHeaders } from "better-auth/node"
+import { emitBoardChanged } from "../../realtime/bus.js"
 
 class EmployeeController {
   public async create(
@@ -17,6 +18,7 @@ class EmployeeController {
       password,
       headers: fromNodeHeaders(request.headers),
     })
+    emitBoardChanged()
     return response.status(201).json(employee)
   }
 
@@ -54,6 +56,7 @@ class EmployeeController {
       headers: fromNodeHeaders(request.headers),
       actorUserId: request.auth!.userId,
     })
+    emitBoardChanged()
     return response.status(200).json(employee)
   }
 
@@ -66,6 +69,7 @@ class EmployeeController {
       headers: fromNodeHeaders(request.headers),
       actorUserId: request.auth!.userId,
     })
+    emitBoardChanged()
     return response.status(204).send()
   }
 }

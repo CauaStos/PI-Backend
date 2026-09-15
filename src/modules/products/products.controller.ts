@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"
 import { AppError } from "../../shared/app-error.js"
 import productService from "./products.service.js"
+import { emitBoardChanged } from "../../realtime/bus.js"
 
 class ProductController {
   public async create(request: Request, response: Response): Promise<Response> {
@@ -12,6 +13,7 @@ class ProductController {
       image,
       stock,
     })
+    emitBoardChanged()
     return response.status(201).json(product)
   }
 
@@ -45,12 +47,14 @@ class ProductController {
       image,
       stock,
     })
+    emitBoardChanged()
     return response.status(200).json(product)
   }
 
   public async delete(request: Request, response: Response): Promise<Response> {
     const { id } = request.params
     await productService.delete(String(id))
+    emitBoardChanged()
     return response.status(204).send()
   }
 }
