@@ -19,6 +19,7 @@ class ProductService {
             name,
             price: data.price,
             description: data.description ?? "",
+            ...(data.image ? { image: data.image } : {}),
             stock: data.stock ?? 0,
         });
     }
