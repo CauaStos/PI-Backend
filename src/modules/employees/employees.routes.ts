@@ -2,6 +2,12 @@ import { Router } from "express"
 import { asyncHandler } from "../../shared/async-handler.js"
 import employeeController from "./employees.controller.js"
 import { requireRoles } from "../auth/auth.middleware.js"
+import { validate } from "../../shared/validate.js"
+import { idParamSchema } from "../../shared/schemas.js"
+import {
+  createEmployeeSchema,
+  updateEmployeeSchema,
+} from "./employees.schemas.js"
 
 const employeeRoutes = Router()
 
@@ -49,6 +55,7 @@ const employeeRoutes = Router()
 employeeRoutes.post(
   "/",
   requireRoles("admin"),
+  validate({ body: createEmployeeSchema }),
   asyncHandler(employeeController.create)
 )
 
@@ -94,7 +101,11 @@ employeeRoutes.get("/", asyncHandler(employeeController.getEmployees))
  *       404:
  *         description: Funcionário não encontrado
  */
-employeeRoutes.get("/:id", asyncHandler(employeeController.getEmployeeById))
+employeeRoutes.get(
+  "/:id",
+  validate({ params: idParamSchema }),
+  asyncHandler(employeeController.getEmployeeById)
+)
 
 /**
  * @openapi
@@ -133,6 +144,7 @@ employeeRoutes.get("/:id", asyncHandler(employeeController.getEmployeeById))
 employeeRoutes.patch(
   "/:id",
   requireRoles("admin"),
+  validate({ body: updateEmployeeSchema, params: idParamSchema }),
   asyncHandler(employeeController.update)
 )
 
@@ -158,6 +170,7 @@ employeeRoutes.patch(
 employeeRoutes.delete(
   "/:id",
   requireRoles("admin"),
+  validate({ params: idParamSchema }),
   asyncHandler(employeeController.delete)
 )
 

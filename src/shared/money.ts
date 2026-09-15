@@ -1,5 +1,1 @@
-export {
-  MONEY_SCALE,
-  toMinor,
-  isValidMoney,
-} from "@pi/contracts"
+export { MONEY_SCALE, toMinor, isValidMoney } from "@pi/contracts"
