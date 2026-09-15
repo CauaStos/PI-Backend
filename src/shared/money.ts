@@ -6,14 +6,14 @@
  * O frontend tem seu proprio modulo de Money para input/formatacao; aqui
  * mantemos apenas o necessario para o seed e validacao no servidor.
  */
-export const MONEY_SCALE = 10_000;
+export const MONEY_SCALE = 10_000
 
 /** Converte um valor em reais (ex.: 24.9) para inteiro de unidades menores. */
 export function toMinor(reais: number): number {
-    return Math.round(reais * MONEY_SCALE);
+  return Math.round(reais * MONEY_SCALE)
 }
 
 /** Valida se um valor e um inteiro de dinheiro valido (>= 0). */
 export function isValidMoney(value: unknown): value is number {
-    return typeof value === "number" && Number.isInteger(value) && value >= 0;
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
 }

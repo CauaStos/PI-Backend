@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { asyncHandler } from "../../shared/async-handler.js";
-import tabController from "./tabs.controller.js";
-import { requireRoles } from "../auth/auth.middleware.js";
+import { Router } from "express"
+import { asyncHandler } from "../../shared/async-handler.js"
+import tabController from "./tabs.controller.js"
+import { requireRoles } from "../auth/auth.middleware.js"
 
-const tabRoutes = Router();
+const tabRoutes = Router()
 
 /**
  * @openapi
@@ -34,7 +34,11 @@ const tabRoutes = Router();
  *       400:
  *         description: Informações inválidas
  */
-tabRoutes.post("/", requireRoles("admin", "garcom"), asyncHandler(tabController.create));
+tabRoutes.post(
+  "/",
+  requireRoles("admin", "garcom"),
+  asyncHandler(tabController.create)
+)
 
 /**
  * @openapi
@@ -53,7 +57,7 @@ tabRoutes.post("/", requireRoles("admin", "garcom"), asyncHandler(tabController.
  *               items:
  *                 $ref: '#/components/schemas/Tab'
  */
-tabRoutes.get("/", asyncHandler(tabController.getTabs));
+tabRoutes.get("/", asyncHandler(tabController.getTabs))
 
 /**
  * @openapi
@@ -78,7 +82,7 @@ tabRoutes.get("/", asyncHandler(tabController.getTabs));
  *       404:
  *         description: Comanda não encontrada
  */
-tabRoutes.get("/:id", asyncHandler(tabController.getTabById));
+tabRoutes.get("/:id", asyncHandler(tabController.getTabById))
 
 /**
  * @openapi
@@ -113,7 +117,11 @@ tabRoutes.get("/:id", asyncHandler(tabController.getTabById));
  *       404:
  *         description: Comanda não encontrada
  */
-tabRoutes.patch("/:id", requireRoles("admin", "garcom"), asyncHandler(tabController.update));
+tabRoutes.patch(
+  "/:id",
+  requireRoles("admin", "garcom"),
+  asyncHandler(tabController.update)
+)
 
 /**
  * @openapi
@@ -134,6 +142,10 @@ tabRoutes.patch("/:id", requireRoles("admin", "garcom"), asyncHandler(tabControl
  *       404:
  *         description: Comanda não encontrada
  */
-tabRoutes.delete("/:id", requireRoles("admin"), asyncHandler(tabController.delete));
+tabRoutes.delete(
+  "/:id",
+  requireRoles("admin"),
+  asyncHandler(tabController.delete)
+)
 
-export default tabRoutes;
+export default tabRoutes

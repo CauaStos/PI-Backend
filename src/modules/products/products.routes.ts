@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { asyncHandler } from "../../shared/async-handler.js";
-import productsController from "./products.controller.js";
-import { requireRoles } from "../auth/auth.middleware.js";
+import { Router } from "express"
+import { asyncHandler } from "../../shared/async-handler.js"
+import productsController from "./products.controller.js"
+import { requireRoles } from "../auth/auth.middleware.js"
 
-const productRoutes = Router();
+const productRoutes = Router()
 
 /**
  * @openapi
@@ -45,7 +45,11 @@ const productRoutes = Router();
  *       400:
  *         description: Informações inválidas
  */
-productRoutes.post("/", requireRoles("admin"), asyncHandler(productsController.create));
+productRoutes.post(
+  "/",
+  requireRoles("admin"),
+  asyncHandler(productsController.create)
+)
 
 /**
  * @openapi
@@ -64,7 +68,7 @@ productRoutes.post("/", requireRoles("admin"), asyncHandler(productsController.c
  *               items:
  *                 $ref: '#/components/schemas/Product'
  */
-productRoutes.get("/", asyncHandler(productsController.getProducts));
+productRoutes.get("/", asyncHandler(productsController.getProducts))
 
 /**
  * @openapi
@@ -92,7 +96,7 @@ productRoutes.get("/", asyncHandler(productsController.getProducts));
  *       404:
  *         description: Produto não encontrado
  */
-productRoutes.get("/:id", asyncHandler(productsController.getProductById));
+productRoutes.get("/:id", asyncHandler(productsController.getProductById))
 
 /**
  * @openapi
@@ -134,7 +138,11 @@ productRoutes.get("/:id", asyncHandler(productsController.getProductById));
  *       404:
  *         description: Produto não encontrado
  */
-productRoutes.patch("/:id", requireRoles("admin"), asyncHandler(productsController.update));
+productRoutes.patch(
+  "/:id",
+  requireRoles("admin"),
+  asyncHandler(productsController.update)
+)
 
 /**
  * @openapi
@@ -158,6 +166,10 @@ productRoutes.patch("/:id", requireRoles("admin"), asyncHandler(productsControll
  *       404:
  *         description: Produto não encontrado
  */
-productRoutes.delete("/:id", requireRoles("admin"), asyncHandler(productsController.delete));
+productRoutes.delete(
+  "/:id",
+  requireRoles("admin"),
+  asyncHandler(productsController.delete)
+)
 
-export default productRoutes;
+export default productRoutes

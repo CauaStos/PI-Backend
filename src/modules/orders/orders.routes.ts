@@ -1,9 +1,12 @@
-import { Router } from "express";
-import { asyncHandler } from "../../shared/async-handler.js";
-import orderController from "./orders.controller.js";
-import { allowKitchenStatusUpdate, requireRoles } from "../auth/auth.middleware.js";
+import { Router } from "express"
+import { asyncHandler } from "../../shared/async-handler.js"
+import orderController from "./orders.controller.js"
+import {
+  allowKitchenStatusUpdate,
+  requireRoles,
+} from "../auth/auth.middleware.js"
 
-const orderRoutes = Router();
+const orderRoutes = Router()
 
 /**
  * @openapi
@@ -54,7 +57,11 @@ const orderRoutes = Router();
  *       400:
  *         description: Informações inválidas
  */
-orderRoutes.post("/", requireRoles("admin", "garcom"), asyncHandler(orderController.create));
+orderRoutes.post(
+  "/",
+  requireRoles("admin", "garcom"),
+  asyncHandler(orderController.create)
+)
 
 /**
  * @openapi
@@ -73,7 +80,7 @@ orderRoutes.post("/", requireRoles("admin", "garcom"), asyncHandler(orderControl
  *               items:
  *                 $ref: '#/components/schemas/Order'
  */
-orderRoutes.get("/", asyncHandler(orderController.getOrders));
+orderRoutes.get("/", asyncHandler(orderController.getOrders))
 
 /**
  * @openapi
@@ -98,7 +105,7 @@ orderRoutes.get("/", asyncHandler(orderController.getOrders));
  *       404:
  *         description: Pedido não encontrado
  */
-orderRoutes.get("/:id", asyncHandler(orderController.getOrderById));
+orderRoutes.get("/:id", asyncHandler(orderController.getOrderById))
 
 /**
  * @openapi
@@ -133,7 +140,12 @@ orderRoutes.get("/:id", asyncHandler(orderController.getOrderById));
  *       404:
  *         description: Pedido não encontrado
  */
-orderRoutes.patch("/:id", requireRoles("admin", "garcom", "cozinha"), allowKitchenStatusUpdate, asyncHandler(orderController.update));
+orderRoutes.patch(
+  "/:id",
+  requireRoles("admin", "garcom", "cozinha"),
+  allowKitchenStatusUpdate,
+  asyncHandler(orderController.update)
+)
 
 /**
  * @openapi
@@ -154,6 +166,10 @@ orderRoutes.patch("/:id", requireRoles("admin", "garcom", "cozinha"), allowKitch
  *       404:
  *         description: Pedido não encontrado
  */
-orderRoutes.delete("/:id", requireRoles("admin"), asyncHandler(orderController.delete));
+orderRoutes.delete(
+  "/:id",
+  requireRoles("admin"),
+  asyncHandler(orderController.delete)
+)
 
-export default orderRoutes;
+export default orderRoutes
