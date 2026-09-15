@@ -6,11 +6,11 @@
  * AppError em uma resposta HTTP uniforme.
  */
 export class AppError extends Error {
-    public readonly status: number;
+  public readonly status: number
 
-    constructor(message: string, status = 400) {
-        super(message);
-        this.name = "AppError";
-        this.status = status;
-    }
+  constructor(message: string, status = 400) {
+    super(message)
+    this.name = "AppError"
+    this.status = status
+  }
 }

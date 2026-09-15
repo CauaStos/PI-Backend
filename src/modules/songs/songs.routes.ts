@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { asyncHandler } from "../../shared/async-handler.js";
-import songController from "./songs.controller.js";
+import { Router } from "express"
+import { asyncHandler } from "../../shared/async-handler.js"
+import songController from "./songs.controller.js"
 
-const songRoutes = Router();
+const songRoutes = Router()
 
 /**
  * @openapi
@@ -21,7 +21,7 @@ const songRoutes = Router();
  *               items:
  *                 $ref: '#/components/schemas/Song'
  */
-songRoutes.get("/", asyncHandler(songController.getSongs));
+songRoutes.get("/", asyncHandler(songController.getSongs))
 
 /**
  * @openapi
@@ -54,7 +54,7 @@ songRoutes.get("/", asyncHandler(songController.getSongs));
  *             schema:
  *               $ref: '#/components/schemas/Song'
  */
-songRoutes.post("/", asyncHandler(songController.create));
+songRoutes.post("/", asyncHandler(songController.create))
 
 /**
  * @openapi
@@ -67,7 +67,7 @@ songRoutes.post("/", asyncHandler(songController.create));
  *       200:
  *         description: Fila avancada com sucesso
  */
-songRoutes.post("/advance", asyncHandler(songController.advance));
+songRoutes.post("/advance", asyncHandler(songController.advance))
 
 /**
  * @openapi
@@ -90,6 +90,6 @@ songRoutes.post("/advance", asyncHandler(songController.advance));
  *       409:
  *         description: Musica ja esta tocando ou foi finalizada
  */
-songRoutes.delete("/:id", asyncHandler(songController.cancel));
+songRoutes.delete("/:id", asyncHandler(songController.cancel))
 
-export default songRoutes;
+export default songRoutes

@@ -1,29 +1,29 @@
-import type { Types } from "mongoose";
-import type { TabStatus } from "../../shared/status.js";
+import type { Types } from "mongoose"
+import type { TabStatus } from "../../shared/status.js"
 
 export interface ITabMember {
-    employee: Types.ObjectId;
-    name: string;
-    avatar: string;
+  employee: Types.ObjectId
+  name: string
+  avatar: string
 }
 
 export interface ITab {
-    tableName: string;
-    status: TabStatus;
-    members: ITabMember[];
-    orders: Types.ObjectId[];
-    openedAt: Date;
-    closedAt: Date | null;
-    createdAt?: Date;
-    updatedAt?: Date;
+  tableName: string
+  status: TabStatus
+  members: ITabMember[]
+  orders: Types.ObjectId[]
+  openedAt: Date
+  closedAt: Date | null
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export interface ICreateTabDTO {
-    tableName: string;
-    memberIds?: string[];
+  tableName: string
+  memberIds?: string[]
 }
 
 export interface IUpdateTabDTO {
-    tableName?: string;
-    status?: TabStatus;
+  tableName?: string
+  status?: TabStatus
 }

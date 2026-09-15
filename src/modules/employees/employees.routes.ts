@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { asyncHandler } from "../../shared/async-handler.js";
-import employeeController from "./employees.controller.js";
-import { requireRoles } from "../auth/auth.middleware.js";
+import { Router } from "express"
+import { asyncHandler } from "../../shared/async-handler.js"
+import employeeController from "./employees.controller.js"
+import { requireRoles } from "../auth/auth.middleware.js"
 
-const employeeRoutes = Router();
+const employeeRoutes = Router()
 
 /**
  * @openapi
@@ -46,7 +46,11 @@ const employeeRoutes = Router();
  *       400:
  *         description: Informações inválidas
  */
-employeeRoutes.post("/", requireRoles("admin"), asyncHandler(employeeController.create));
+employeeRoutes.post(
+  "/",
+  requireRoles("admin"),
+  asyncHandler(employeeController.create)
+)
 
 /**
  * @openapi
@@ -65,7 +69,7 @@ employeeRoutes.post("/", requireRoles("admin"), asyncHandler(employeeController.
  *               items:
  *                 $ref: '#/components/schemas/Employee'
  */
-employeeRoutes.get("/", asyncHandler(employeeController.getEmployees));
+employeeRoutes.get("/", asyncHandler(employeeController.getEmployees))
 
 /**
  * @openapi
@@ -90,7 +94,7 @@ employeeRoutes.get("/", asyncHandler(employeeController.getEmployees));
  *       404:
  *         description: Funcionário não encontrado
  */
-employeeRoutes.get("/:id", asyncHandler(employeeController.getEmployeeById));
+employeeRoutes.get("/:id", asyncHandler(employeeController.getEmployeeById))
 
 /**
  * @openapi
@@ -126,7 +130,11 @@ employeeRoutes.get("/:id", asyncHandler(employeeController.getEmployeeById));
  *       404:
  *         description: Funcionário não encontrado
  */
-employeeRoutes.patch("/:id", requireRoles("admin"), asyncHandler(employeeController.update));
+employeeRoutes.patch(
+  "/:id",
+  requireRoles("admin"),
+  asyncHandler(employeeController.update)
+)
 
 /**
  * @openapi
@@ -147,6 +155,10 @@ employeeRoutes.patch("/:id", requireRoles("admin"), asyncHandler(employeeControl
  *       404:
  *         description: Funcionário não encontrado
  */
-employeeRoutes.delete("/:id", requireRoles("admin"), asyncHandler(employeeController.delete));
+employeeRoutes.delete(
+  "/:id",
+  requireRoles("admin"),
+  asyncHandler(employeeController.delete)
+)
 
-export default employeeRoutes;
+export default employeeRoutes
