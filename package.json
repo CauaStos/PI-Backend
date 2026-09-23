@@ -51,6 +51,5 @@
   },
   "workspaces": [
     "packages/contracts"
-  ],
-  "@better-auth/mongo-adapter": "1.7.2"
+  ]
 }

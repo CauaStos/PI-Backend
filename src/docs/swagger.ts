@@ -4,9 +4,9 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Karaoke API",
+      title: "OnStage API",
       version: "1.0.0",
-      description: "API para gerenciamento de um sistema para karaokes.",
+      description: "API do OnStage - comandas, pedidos e fila de musicas.",
     },
     servers: [
       {

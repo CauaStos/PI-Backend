@@ -10,12 +10,6 @@ const routes = Router()
 
 routes.use(requireAuth)
 
-routes.get("/teste", (_request, response) => {
-  return response.status(200).json({
-    message: "Endpoint de teste",
-  })
-})
-
 routes.use("/products", productRoutes)
 routes.use("/orders", orderRoutes)
 routes.use("/tabs", tabRoutes)
