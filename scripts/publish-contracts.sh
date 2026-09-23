@@ -26,6 +26,7 @@ find packages/contracts/src packages/contracts/dist -type f | while read -r f; d
 done
 
 tree=$(git write-tree)
+git fetch origin refs/heads/npm/contracts:refs/heads/npm/contracts --force 2>/dev/null || true
 parent=$(git rev-parse --verify -q "refs/heads/npm/contracts" 2>/dev/null || true)
 if [ -n "$parent" ]; then
   commit=$(git commit-tree "$tree" -p "$parent" -m "contracts: $(git rev-parse --short HEAD)")
