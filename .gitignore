@@ -1,3 +1,9 @@
 node_modules/
 .env
 dist/
+
+# artefatos de build dos testes (vitest + tsc)
+tests/**/*.js
+tests/**/*.js.map
+tests/**/*.d.ts
+tests/**/*.d.ts.map
