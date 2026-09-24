@@ -1,6 +1,8 @@
 import type { HydratedDocument } from "mongoose"
 import { AppError } from "../../shared/app-error.js"
 import { isTabOpen, STATUS, type TabStatus } from "../../shared/status.js"
+import { withTransaction } from "../../shared/with-transaction.js"
+import type { ClientSession } from "mongoose"
 import Employee from "../employees/employees.model.js"
 import Order from "../orders/orders.model.js"
 import Product from "../products/products.model.js"
@@ -47,46 +49,53 @@ class TabService {
   }
 
   public async update(id: string, data: IUpdateTabDTO) {
-    const tab = await Tab.findById(id)
-    if (!tab) throw new AppError("Comanda nao encontrada.", 404)
+    return withTransaction(async (session) => {
+      const tab = await Tab.findById(id).session(session)
+      if (!tab) throw new AppError("Comanda nao encontrada.", 404)
 
-    if (data.tableName !== undefined) {
-      const tableName = data.tableName.trim()
-      if (!tableName) throw new AppError("Nome da mesa e obrigatorio.")
-      tab.tableName = tableName
-    }
+      if (data.tableName !== undefined) {
+        const tableName = data.tableName.trim()
+        if (!tableName) throw new AppError("Nome da mesa e obrigatorio.")
+        tab.tableName = tableName
+      }
 
-    if (data.status !== undefined && data.status !== tab.status) {
-      await this.applyStatusTransition(tab, data.status)
-    }
+      if (data.status !== undefined && data.status !== tab.status) {
+        await this.applyStatusTransition(tab, data.status, session)
+      }
 
-    await tab.save()
-    return tab.populate("orders")
+      await tab.save({ session })
+      return tab.populate("orders")
+    })
   }
 
   public async delete(id: string) {
-    const tab = await Tab.findById(id)
-    if (!tab) throw new AppError("Comanda nao encontrada.", 404)
+    return withTransaction(async (session) => {
+      const tab = await Tab.findById(id).session(session)
+      if (!tab) throw new AppError("Comanda nao encontrada.", 404)
 
-    const orders = await Order.find({ tab: tab._id })
-    for (const order of orders) {
-      if (order.status !== STATUS.CANCELLED) {
-        const product = await Product.findById(order.product)
-        if (product) {
-          product.stock += order.quantity
-          await product.save()
+      const orders = await Order.find({ tab: tab._id }).session(session)
+      for (const order of orders) {
+        if (order.status !== STATUS.CANCELLED) {
+          const product = await Product.findById(order.product).session(session)
+          if (product) {
+            product.stock += order.quantity
+            await product.save({ session })
+          }
         }
       }
-    }
 
-    await Order.deleteMany({ tab: tab._id })
-    await tab.deleteOne()
-    return tab
+      await (session
+        ? Order.deleteMany({ tab: tab._id }, { session })
+        : Order.deleteMany({ tab: tab._id }))
+      await tab.deleteOne({ session })
+      return tab
+    })
   }
 
   private async applyStatusTransition(
     tab: HydratedDocument<ITab>,
-    nextStatus: TabStatus
+    nextStatus: TabStatus,
+    session: ClientSession | null
   ): Promise<void> {
     if (nextStatus === STATUS.FINISHED || nextStatus === STATUS.CANCELLED) {
       if (!isTabOpen(tab.status)) {
@@ -94,14 +103,14 @@ class TabService {
       }
     }
 
-    const orders = await Order.find({ tab: tab._id })
+    const orders = await Order.find({ tab: tab._id }).session(session)
 
     if (nextStatus === STATUS.FINISHED) {
       for (const order of orders) {
         if (order.status === STATUS.IN_PROGRESS) {
           order.status = STATUS.DELIVERED
           order.deliveredAt = order.deliveredAt ?? new Date()
-          await order.save()
+          await order.save({ session })
         }
       }
       tab.status = STATUS.FINISHED
@@ -112,13 +121,13 @@ class TabService {
     if (nextStatus === STATUS.CANCELLED) {
       for (const order of orders) {
         if (order.status !== STATUS.CANCELLED) {
-          const product = await Product.findById(order.product)
+          const product = await Product.findById(order.product).session(session)
           if (product) {
             product.stock += order.quantity
-            await product.save()
+            await product.save({ session })
           }
           order.status = STATUS.CANCELLED
-          await order.save()
+          await order.save({ session })
         }
       }
       tab.status = STATUS.CANCELLED
