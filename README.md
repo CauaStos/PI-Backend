@@ -1,13 +1,16 @@
 # PI Backend
 
-API em Express com MongoDB.
+API do OnStage: Express + MongoDB. Gerencia comandas, pedidos, produtos,
+funcionários e a fila de músicas.
 
 ## Requisitos
 
-- Node.js 22 ou superior
-- Uma instancia do MongoDB local ou hospedada
+- Node.js 22+
+- MongoDB 
 
-## Rodando localmente
+ou Docker pra subir tudo direto.
+
+## Para rodar
 
 ```bash
 npm install
@@ -15,17 +18,64 @@ cp .env.example .env
 npm run dev
 ```
 
-A API inicia em `http://localhost:3000` por padrao e as rotas ficam em
-`/api/v1`.
-
-## Scripts
+ou, com docker:
 
 ```bash
-npm run dev        # inicia com recarregamento automatico
-npm start          # inicia a API
-npm run seed       # popula o banco com dados de demonstracao
-npm run typecheck  # verifica os tipos TypeScript
+docker compose up -d
 ```
 
-Configure `PORT` e `MONGO_URI` no `.env`. Veja os valores de exemplo em
-`.env.example`.
+A API sobe em `http://localhost:3000` e as rotas ficam em `/api/v1`.
+
+O healthcheck inicia o replica set sozinho na primeira subida, não precisa fazer nada.
+
+
+## Dados de demonstração
+
+```bash
+npm run seed
+```
+
+ou, com docker:
+
+```bash
+docker compose run --rm seed
+```
+
+
+## Primeiro usuário
+
+Para criar o primeiro usuário, é só rodar 
+
+```bash
+npm run bootstrap-admin
+```
+
+ou, com docker:
+
+```bash
+docker compose run --rm bootstrap-admin
+```
+
+O app não tem cadastro. Então o primeiro admin tem que ser criado usando o script de bootstrap. O script vai puxar as seguintes configurações do `.env`:
+
+```bash
+BETTER_AUTH_SECRET=um-secret-longo
+BOOTSTRAP_ADMIN_NAME=Administrador
+BOOTSTRAP_ADMIN_EMAIL=admin@exemplo.com
+BOOTSTRAP_ADMIN_PASSWORD=senha-de-pelo-menos-8-chars
+```
+
+Depois de rodar, é só logar no front com o email e senha.
+
+## Scripts úteis
+
+```bash
+npm run dev           
+npm start              
+npm run seed          
+npm run bootstrap-admin
+npm test              
+npm run typecheck      
+```
+
+A doc da API (swagger) fica em `/api-docs`. Os schemas de resposta são gerados direto do schemas do zod (`@pi/contracts`), então ele nunca dessincroniza.
