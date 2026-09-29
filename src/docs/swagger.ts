@@ -75,8 +75,18 @@ const options: swaggerJsdoc.Options = {
       },
     ],
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description:
+            "Access token JWT obtido em GET /api/auth/token (header Authorization: Bearer <token>).",
+        },
+      },
       schemas,
     },
+    security: [{ bearerAuth: [] }],
   },
   apis: ["./src/modules/**/*.routes.ts"],
 }
