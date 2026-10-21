@@ -24,10 +24,16 @@ import {
   requireAuth,
   requireEmployeeReadAccess,
   requireEmployeeUpdateAccess,
-  requireRoles,
+  requireOrderUpdatePermission,
+  requirePermission,
 } from "../src/modules/auth/auth.middleware.js"
 import { isSessionActive, verifyAccessToken } from "../src/modules/auth/auth.service.js"
 import Employee from "../src/modules/employees/employees.model.js"
+import {
+  hasPermission,
+  Permission,
+  ROLE_PERMISSIONS,
+} from "../src/shared/auth/permissions.js"
 
 const verifyMock = vi.mocked(verifyAccessToken)
 const sessionMock = vi.mocked(isSessionActive)
@@ -139,24 +145,57 @@ describe("requireAuth", () => {
   })
 })
 
-describe("requireRoles", () => {
-  function call(role: Role) {
+describe("permissoes por papel", () => {
+  function call(role: Role, permission: Permission) {
     const request = {
       auth: { role },
     } as unknown as Request
     const next = vi.fn() as unknown as NextFunction
-    requireRoles(Role.ADMIN)(request, {} as Response, next)
+    requirePermission(permission)(request, {} as Response, next)
     return (next as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] as
       | AppError
       | undefined
   }
 
-  it("bloqueia garcom", () => {
-    expect(call(Role.OPERADOR)?.status).toBe(403)
+  it("concede ao ADMIN todas as permissoes declaradas", () => {
+    expect(ROLE_PERMISSIONS[Role.ADMIN]).toEqual(Object.values(Permission))
   })
 
-  it("libera admin", () => {
-    expect(call(Role.ADMIN)).toBeUndefined()
+  it("limita GERENTE a leitura ampla e edicao do proprio perfil", () => {
+    expect(hasPermission(Role.GERENTE, Permission.EMPLOYEE_READ)).toBe(true)
+    expect(hasPermission(Role.GERENTE, Permission.EMPLOYEE_UPDATE_OWN)).toBe(
+      true
+    )
+    expect(hasPermission(Role.GERENTE, Permission.EMPLOYEE_UPDATE)).toBe(false)
+    expect(hasPermission(Role.GERENTE, Permission.EMPLOYEE_DELETE)).toBe(false)
+  })
+
+  it("exige a permissao configurada no middleware", () => {
+    expect(call(Role.OPERADOR, Permission.ORDER_CREATE)).toBeUndefined()
+    expect(call(Role.OPERADOR, Permission.PRODUCT_MANAGE)?.status).toBe(403)
+    expect(call(Role.CLIENTE, Permission.EMPLOYEE_READ)?.status).toBe(403)
+  })
+
+  it("distingue atualizacao de status da atualizacao geral de pedidos", () => {
+    function updateCall(role: Role, body: Record<string, unknown>) {
+      const request = {
+        auth: { role },
+        body,
+      } as unknown as Request
+      const next = vi.fn() as unknown as NextFunction
+      requireOrderUpdatePermission(request, {} as Response, next)
+      return (next as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] as
+        | AppError
+        | undefined
+    }
+
+    expect(updateCall(Role.GERENTE, { status: "delivered" })?.status).toBe(403)
+    expect(
+      updateCall(Role.OPERADOR, { status: "delivered" })
+    ).toBeUndefined()
+    expect(
+      updateCall(Role.OPERADOR, { status: "delivered", quantity: 2 })
+    ).toBeUndefined()
   })
 })
 
@@ -171,6 +210,10 @@ describe("mapeamento de papeis", () => {
     [Role.CLIENTE, Role.CLIENTE],
   ] as const)("mapeia %s para %s", (storedRole, accessRole) => {
     expect(toAccessRole(storedRole)).toBe(accessRole)
+  })
+
+  it("nao mapeia um papel desconhecido", () => {
+    expect(toAccessRole("UNKNOWN")).toBeNull()
   })
 })
 
@@ -235,13 +278,13 @@ describe("autorizacao de funcionarios", () => {
     ).toBe(403)
   })
 
-  it("permite GERENTE editar outros funcionarios, sem conceder papel", () => {
+  it("permite GERENTE editar apenas o proprio perfil basico", () => {
     expect(
       runMiddleware(
         requireEmployeeUpdateAccess,
         Role.GERENTE,
-        "manager-1",
-        { id: "employee-2" },
+        "employee-1",
+        { id: "employee-1" },
         { name: "Nome atualizado" }
       )
     ).toBeUndefined()
@@ -251,7 +294,25 @@ describe("autorizacao de funcionarios", () => {
         Role.GERENTE,
         "manager-1",
         { id: "employee-2" },
+        { name: "Nome atualizado" }
+      )?.status
+    ).toBe(403)
+    expect(
+      runMiddleware(
+        requireEmployeeUpdateAccess,
+        Role.GERENTE,
+        "employee-1",
+        { id: "employee-1" },
         { role: Role.ADMIN }
+      )?.status
+    ).toBe(403)
+    expect(
+      runMiddleware(
+        requireEmployeeUpdateAccess,
+        Role.GERENTE,
+        "employee-1",
+        { id: "employee-1" },
+        { email: "novo@example.com" }
       )?.status
     ).toBe(403)
   })

@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { asyncHandler } from "../../shared/async-handler.js"
 import songController from "./songs.controller.js"
+import { requirePermission } from "../auth/auth.middleware.js"
 
 const songRoutes = Router()
 
@@ -21,7 +22,11 @@ const songRoutes = Router()
  *               items:
  *                 $ref: '#/components/schemas/Song'
  */
-songRoutes.get("/", asyncHandler(songController.getSongs))
+songRoutes.get(
+  "/",
+  requirePermission("song.read"),
+  asyncHandler(songController.getSongs)
+)
 
 /**
  * @openapi
@@ -54,7 +59,11 @@ songRoutes.get("/", asyncHandler(songController.getSongs))
  *             schema:
  *               $ref: '#/components/schemas/Song'
  */
-songRoutes.post("/", asyncHandler(songController.create))
+songRoutes.post(
+  "/",
+  requirePermission("song.create"),
+  asyncHandler(songController.create)
+)
 
 /**
  * @openapi
@@ -67,7 +76,11 @@ songRoutes.post("/", asyncHandler(songController.create))
  *       200:
  *         description: Fila avancada com sucesso
  */
-songRoutes.post("/advance", asyncHandler(songController.advance))
+songRoutes.post(
+  "/advance",
+  requirePermission("song.manage"),
+  asyncHandler(songController.advance)
+)
 
 /**
  * @openapi
@@ -90,6 +103,10 @@ songRoutes.post("/advance", asyncHandler(songController.advance))
  *       409:
  *         description: Musica ja esta tocando ou foi finalizada
  */
-songRoutes.delete("/:id", asyncHandler(songController.cancel))
+songRoutes.delete(
+  "/:id",
+  requirePermission("song.manage"),
+  asyncHandler(songController.cancel)
+)
 
 export default songRoutes

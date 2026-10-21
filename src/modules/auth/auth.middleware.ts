@@ -2,8 +2,11 @@ import type { NextFunction, Request, Response } from "express"
 import { AppError } from "../../shared/app-error.js"
 import Employee from "../employees/employees.model.js"
 import { toAccessRole } from "../employees/employees.types.js"
-import type { EmployeeRole } from "../employees/employees.types.js"
-import { Role } from "../../shared/enums/role.js"
+import {
+  hasPermission,
+  Permission,
+  type Permission as PermissionType,
+} from "../../shared/auth/permissions.js"
 import { isSessionActive, verifyAccessToken } from "./auth.service.js"
 import type { RequestAuth } from "./auth.types.js"
 
@@ -64,11 +67,15 @@ export async function requireAuth(
   if (!employee) {
     return next(new AppError("Funcionario nao vinculado a esta conta.", 403))
   }
+  const role = toAccessRole(employee.role)
+  if (!role) {
+    return next(new AppError("Papel do funcionario invalido.", 403))
+  }
 
   request.auth = {
     userId,
     sessionId,
-    role: toAccessRole(employee.role),
+    role,
     employee: {
       id: String(employee._id),
       role: employee.role,
@@ -79,10 +86,11 @@ export async function requireAuth(
   return next()
 }
 
-export function requireRoles(...roles: Role[]) {
+export function requirePermission(permission: PermissionType) {
   return (request: Request, _response: Response, next: NextFunction) => {
-    if (!request.auth || !roles.includes(request.auth.role))
+    if (!request.auth || !hasPermission(request.auth.role, permission)) {
       return next(new AppError("Permissao insuficiente.", 403))
+    }
     return next()
   }
 }
@@ -92,13 +100,15 @@ export function requireEmployeeReadAccess(
   _response: Response,
   next: NextFunction
 ) {
-  const role = request.auth?.role
-  const canReadAll =
-    role === Role.ADMIN || role === Role.GERENTE || role === Role.OPERADOR
-  const isSelf =
-    !request.params["id"] ||
-    request.auth?.employee.id === request.params["id"]
-  if (!request.auth || (!canReadAll && !isSelf)) {
+  const auth = request.auth
+  const employeeId = request.params["id"]
+  const permission =
+    auth &&
+    (!employeeId || employeeId === auth.employee.id
+      ? hasPermission(auth.role, Permission.EMPLOYEE_READ_OWN) ||
+        hasPermission(auth.role, Permission.EMPLOYEE_READ)
+      : hasPermission(auth.role, Permission.EMPLOYEE_READ))
+  if (!auth || !permission) {
     return next(new AppError("Permissao insuficiente.", 403))
   }
   return next()
@@ -112,21 +122,42 @@ export function requireEmployeeUpdateAccess(
   const auth = request.auth
   if (!auth) return next(new AppError("Permissao insuficiente.", 403))
 
-  if (auth.role === Role.ADMIN) return next()
-
-  if (Object.hasOwn(request.body ?? {}, "role")) {
-    return next(new AppError("Somente ADMIN pode alterar papéis.", 403))
+  const employeeId = request.params["id"] ?? auth.employee.id
+  const isSelf = auth.employee.id === employeeId
+  const hasUpdatePermission = isSelf
+    ? hasPermission(auth.role, Permission.EMPLOYEE_UPDATE_OWN) ||
+      hasPermission(auth.role, Permission.EMPLOYEE_UPDATE)
+    : hasPermission(auth.role, Permission.EMPLOYEE_UPDATE)
+  if (!hasUpdatePermission) {
+    return next(new AppError("Permissao insuficiente.", 403))
   }
 
-  if (auth.role === Role.GERENTE) return next()
+  const updatesAccess = Object.hasOwn(request.body ?? {}, "email")
+    ? hasPermission(auth.role, Permission.EMPLOYEE_MANAGE_ACCESS)
+    : !Object.hasOwn(request.body ?? {}, "role") ||
+      hasPermission(auth.role, Permission.EMPLOYEE_MANAGE_ACCESS)
+  if (!updatesAccess) {
+    return next(
+      new AppError("Somente usuários autorizados podem alterar o papel.", 403)
+    )
+  }
+  return next()
+}
 
-  const isSelf =
-    auth.employee.id === (request.params["id"] ?? auth.employee.id)
-  const isProfileOnly = Object.keys(request.body ?? {}).every((key) =>
-    ["name", "avatar"].includes(key)
-  )
-  if (isSelf && isProfileOnly) return next()
-  return next(new AppError("Permissao insuficiente.", 403))
+export function requireOrderUpdatePermission(
+  request: Request,
+  _response: Response,
+  next: NextFunction
+) {
+  const fields = Object.keys(request.body ?? {})
+  const permission =
+    fields.length === 1 && fields[0] === "status"
+      ? Permission.ORDER_UPDATE_STATUS
+      : Permission.ORDER_UPDATE
+  if (!request.auth || !hasPermission(request.auth.role, permission)) {
+    return next(new AppError("Permissao insuficiente.", 403))
+  }
+  return next()
 }
 
 export function allowKitchenStatusUpdate(

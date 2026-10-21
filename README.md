@@ -157,6 +157,30 @@ O cookie de sessão continua existindo para refresh do token e para o handshake
 do socket.io (que autentica por cookie). Logout e reset invalidam o JWT porque
 a sessão deixa de existir no banco.
 
+## Autorização RBAC
+
+Os papéis de negócio ficam em `src/shared/enums/role.ts`. As permissões e a
+matriz papel-permissões são centralizadas em
+`src/shared/auth/permissions.ts`; as rotas usam permissões como
+`employee.read`, `employee.update`, `order.create`,
+`order.update_status` e `product.manage`, em vez de comparar papéis.
+
+O middleware carrega o funcionário vinculado à sessão e usa o papel atual do
+banco para autorizar cada requisição. O papel informado no JWT não concede
+acesso por si só. A conversão dos valores antigos preserva os registros já
+existentes: `admin` vira `ADMIN`, e `garcom`/`cozinha` viram `OPERADOR`.
+
+| Papel | Acesso resumido |
+| --- | --- |
+| `ADMIN` | Todas as permissões; pode cadastrar, editar papéis e excluir funcionários. |
+| `GERENTE` | Consulta funcionários e dados operacionais; edita somente o próprio nome/avatar. |
+| `OPERADOR` | Consulta funcionários/produtos; opera pedidos, comandas e músicas conforme a matriz. |
+| `CLIENTE` | Consulta e atualiza apenas o próprio perfil básico. |
+
+O acesso a email e papel exige `employee.manage_access`; a exclusão exige
+`employee.delete`. Para alterar essas regras, atualize a matriz
+`ROLE_PERMISSIONS` e mantenha os testes de autorização alinhados.
+
 ### Contrato com o front
 
 Use o client padrão do Better Auth com o plugin jwt. O `authClient` já manda o

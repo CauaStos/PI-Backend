@@ -4,7 +4,7 @@ import employeeController from "./employees.controller.js"
 import {
   requireEmployeeReadAccess,
   requireEmployeeUpdateAccess,
-  requireRoles,
+  requirePermission,
 } from "../auth/auth.middleware.js"
 import { validate } from "../../shared/validate.js"
 import { idParamSchema } from "../../shared/schemas.js"
@@ -12,7 +12,6 @@ import {
   createEmployeeSchema,
   updateEmployeeSchema,
 } from "./employees.schemas.js"
-import { Role } from "../../shared/enums/role.js"
 
 const employeeRoutes = Router()
 
@@ -60,7 +59,7 @@ const employeeRoutes = Router()
  */
 employeeRoutes.post(
   "/",
-  requireRoles(Role.ADMIN),
+  requirePermission("employee.create"),
   validate({ body: createEmployeeSchema }),
   asyncHandler(employeeController.create)
 )
@@ -84,11 +83,15 @@ employeeRoutes.post(
  */
 employeeRoutes.get(
   "/",
-  requireRoles(Role.ADMIN, Role.GERENTE, Role.OPERADOR),
+  requirePermission("employee.read"),
   asyncHandler(employeeController.getEmployees)
 )
 
-employeeRoutes.get("/me", asyncHandler(employeeController.getEmployeeById))
+employeeRoutes.get(
+  "/me",
+  requirePermission("employee.read_own"),
+  asyncHandler(employeeController.getEmployeeById)
+)
 employeeRoutes.patch(
   "/me",
   validate({ body: updateEmployeeSchema }),
@@ -203,7 +206,7 @@ employeeRoutes.patch(
  */
 employeeRoutes.delete(
   "/:id",
-  requireRoles(Role.ADMIN),
+  requirePermission("employee.delete"),
   validate({ params: idParamSchema }),
   asyncHandler(employeeController.delete)
 )

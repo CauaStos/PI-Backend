@@ -8,7 +8,7 @@ export const EMPLOYEE_ROLES = [
 
 export type EmployeeRole = (typeof EMPLOYEE_ROLES)[number] & string
 
-export function toAccessRole(role: EmployeeRole): Role {
+export function toAccessRole(role: string): Role | null {
   switch (role) {
     case "admin":
     case Role.ADMIN:
@@ -21,6 +21,8 @@ export function toAccessRole(role: EmployeeRole): Role {
       return Role.GERENTE
     case Role.CLIENTE:
       return Role.CLIENTE
+    default:
+      return null
   }
 }
 
