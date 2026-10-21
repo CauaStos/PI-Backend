@@ -1,6 +1,32 @@
-export const EMPLOYEE_ROLES = ["admin", "garcom", "cozinha"] as const
+import { Role } from "../../shared/enums/role.js"
+
+export const LEGACY_EMPLOYEE_ROLES = ["admin", "garcom", "cozinha"] as const
+export const EMPLOYEE_ROLES = [
+  ...LEGACY_EMPLOYEE_ROLES,
+  ...Object.values(Role),
+] as const
 
 export type EmployeeRole = (typeof EMPLOYEE_ROLES)[number] & string
+
+export function toAccessRole(role: EmployeeRole): Role {
+  switch (role) {
+    case "admin":
+    case Role.ADMIN:
+      return Role.ADMIN
+    case "garcom":
+    case "cozinha":
+    case Role.OPERADOR:
+      return Role.OPERADOR
+    case Role.GERENTE:
+      return Role.GERENTE
+    case Role.CLIENTE:
+      return Role.CLIENTE
+  }
+}
+
+export function isAdminRole(role: EmployeeRole): boolean {
+  return toAccessRole(role) === Role.ADMIN
+}
 
 export interface IEmployee {
   authUserId?: string
@@ -28,4 +54,5 @@ export interface IUpdateEmployeeDTO {
   avatar?: string
   headers: Headers
   actorUserId?: string
+  actorRole?: Role
 }

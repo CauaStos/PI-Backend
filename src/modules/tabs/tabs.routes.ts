@@ -5,6 +5,7 @@ import { requireRoles } from "../auth/auth.middleware.js"
 import { validate } from "../../shared/validate.js"
 import { idParamSchema } from "../../shared/schemas.js"
 import { createTabSchema, updateTabSchema } from "./tabs.schemas.js"
+import { Role } from "../../shared/enums/role.js"
 
 const tabRoutes = Router()
 
@@ -39,7 +40,7 @@ const tabRoutes = Router()
  */
 tabRoutes.post(
   "/",
-  requireRoles("admin", "garcom"),
+  requireRoles(Role.ADMIN, Role.OPERADOR),
   validate({ body: createTabSchema }),
   asyncHandler(tabController.create)
 )
@@ -127,7 +128,7 @@ tabRoutes.get(
  */
 tabRoutes.patch(
   "/:id",
-  requireRoles("admin", "garcom"),
+  requireRoles(Role.ADMIN, Role.OPERADOR),
   validate({ body: updateTabSchema, params: idParamSchema }),
   asyncHandler(tabController.update)
 )
@@ -153,7 +154,7 @@ tabRoutes.patch(
  */
 tabRoutes.delete(
   "/:id",
-  requireRoles("admin"),
+  requireRoles(Role.ADMIN),
   asyncHandler(tabController.delete)
 )
 

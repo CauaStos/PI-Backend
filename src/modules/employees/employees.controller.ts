@@ -4,6 +4,15 @@ import employeeService from "./employees.service.js"
 import { fromNodeHeaders } from "better-auth/node"
 import { emitBoardChanged } from "../../realtime/bus.js"
 
+function getEmployeeId(request: express.Request): string {
+  const id = request.params["id"]
+  if (id === undefined) return request.auth!.employee.id
+  if (typeof id !== "string") {
+    throw new AppError("Identificador invalido.", 400)
+  }
+  return id
+}
+
 class EmployeeController {
   public async create(
     request: express.Request,
@@ -34,8 +43,7 @@ class EmployeeController {
     request: express.Request,
     response: express.Response
   ): Promise<express.Response> {
-    const { id } = request.params
-    const employee = await employeeService.getById(String(id))
+    const employee = await employeeService.getById(getEmployeeId(request))
     if (!employee) {
       throw new AppError("Funcionario nao encontrado.", 404)
     }
@@ -46,7 +54,7 @@ class EmployeeController {
     request: express.Request,
     response: express.Response
   ): Promise<express.Response> {
-    const { id } = request.params
+    const id = getEmployeeId(request)
     const { name, email, role, avatar } = request.body
     const employee = await employeeService.update(String(id), {
       name,
@@ -55,6 +63,7 @@ class EmployeeController {
       avatar,
       headers: fromNodeHeaders(request.headers),
       actorUserId: request.auth!.userId,
+      actorRole: request.auth!.role,
     })
     emitBoardChanged()
     return response.status(200).json(employee)
@@ -64,8 +73,7 @@ class EmployeeController {
     request: express.Request,
     response: express.Response
   ): Promise<express.Response> {
-    const { id } = request.params
-    await employeeService.delete(String(id), {
+    await employeeService.delete(getEmployeeId(request), {
       headers: fromNodeHeaders(request.headers),
       actorUserId: request.auth!.userId,
     })

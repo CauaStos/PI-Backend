@@ -5,6 +5,7 @@ import { requireRoles } from "../auth/auth.middleware.js"
 import { validate } from "../../shared/validate.js"
 import { idParamSchema } from "../../shared/schemas.js"
 import { createProductSchema, updateProductSchema } from "./products.schemas.js"
+import { Role } from "../../shared/enums/role.js"
 
 const productRoutes = Router()
 
@@ -50,7 +51,7 @@ const productRoutes = Router()
  */
 productRoutes.post(
   "/",
-  requireRoles("admin"),
+  requireRoles(Role.ADMIN),
   validate({ body: createProductSchema }),
   asyncHandler(productsController.create)
 )
@@ -148,7 +149,7 @@ productRoutes.get(
  */
 productRoutes.patch(
   "/:id",
-  requireRoles("admin"),
+  requireRoles(Role.ADMIN),
   validate({ body: updateProductSchema, params: idParamSchema }),
   asyncHandler(productsController.update)
 )
@@ -177,7 +178,7 @@ productRoutes.patch(
  */
 productRoutes.delete(
   "/:id",
-  requireRoles("admin"),
+  requireRoles(Role.ADMIN),
   asyncHandler(productsController.delete)
 )
 

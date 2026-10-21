@@ -4,6 +4,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb"
 import { APIError, createAuthMiddleware } from "better-auth/api"
 import { admin, jwt } from "better-auth/plugins"
 import Employee from "../modules/employees/employees.model.js"
+import { Role } from "../shared/enums/role.js"
 import {
   getBaseUrl,
   getJwtAudience,
@@ -140,10 +141,25 @@ export const auth = betterAuth({
         audience: getJwtAudience(),
         expirationTime: "15m",
         // Liga o JWT a sessao ativa: permite revogar no logout/reset.
-        definePayload: ({ user, session }) => ({
-          sessionId: session.id,
-          email: user.email,
-        }),
+        definePayload: ({ user, session }) => {
+          const employeeRole = user.employeeRole
+          const role =
+            employeeRole === "admin" || employeeRole === Role.ADMIN
+              ? Role.ADMIN
+              : employeeRole === "garcom" ||
+                  employeeRole === "cozinha" ||
+                  employeeRole === Role.OPERADOR
+                ? Role.OPERADOR
+                : employeeRole === Role.GERENTE ||
+                    employeeRole === Role.CLIENTE
+                  ? employeeRole
+                  : undefined
+          return {
+            sessionId: session.id,
+            email: user.email,
+            ...(role ? { role } : {}),
+          }
+        },
       },
     }),
   ],

@@ -8,6 +8,7 @@ import {
   allowKitchenStatusUpdate,
   requireRoles,
 } from "../auth/auth.middleware.js"
+import { Role } from "../../shared/enums/role.js"
 
 const orderRoutes = Router()
 
@@ -62,7 +63,7 @@ const orderRoutes = Router()
  */
 orderRoutes.post(
   "/",
-  requireRoles("admin", "garcom"),
+  requireRoles(Role.ADMIN, Role.OPERADOR),
   validate({ body: createOrderSchema }),
   asyncHandler(orderController.create)
 )
@@ -150,7 +151,7 @@ orderRoutes.get(
  */
 orderRoutes.patch(
   "/:id",
-  requireRoles("admin", "garcom", "cozinha"),
+  requireRoles(Role.ADMIN, Role.OPERADOR),
   allowKitchenStatusUpdate,
   validate({ body: updateOrderSchema, params: idParamSchema }),
   asyncHandler(orderController.update)
@@ -177,7 +178,7 @@ orderRoutes.patch(
  */
 orderRoutes.delete(
   "/:id",
-  requireRoles("admin"),
+  requireRoles(Role.ADMIN),
   validate({ params: idParamSchema }),
   asyncHandler(orderController.delete)
 )

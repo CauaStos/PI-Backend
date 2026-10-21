@@ -1,7 +1,9 @@
 import type { NextFunction, Request, Response } from "express"
 import { AppError } from "../../shared/app-error.js"
 import Employee from "../employees/employees.model.js"
+import { toAccessRole } from "../employees/employees.types.js"
 import type { EmployeeRole } from "../employees/employees.types.js"
+import { Role } from "../../shared/enums/role.js"
 import { isSessionActive, verifyAccessToken } from "./auth.service.js"
 import type { RequestAuth } from "./auth.types.js"
 
@@ -66,6 +68,7 @@ export async function requireAuth(
   request.auth = {
     userId,
     sessionId,
+    role: toAccessRole(employee.role),
     employee: {
       id: String(employee._id),
       role: employee.role,
@@ -76,12 +79,54 @@ export async function requireAuth(
   return next()
 }
 
-export function requireRoles(...roles: EmployeeRole[]) {
+export function requireRoles(...roles: Role[]) {
   return (request: Request, _response: Response, next: NextFunction) => {
-    if (!request.auth || !roles.includes(request.auth.employee.role))
+    if (!request.auth || !roles.includes(request.auth.role))
       return next(new AppError("Permissao insuficiente.", 403))
     return next()
   }
+}
+
+export function requireEmployeeReadAccess(
+  request: Request,
+  _response: Response,
+  next: NextFunction
+) {
+  const role = request.auth?.role
+  const canReadAll =
+    role === Role.ADMIN || role === Role.GERENTE || role === Role.OPERADOR
+  const isSelf =
+    !request.params["id"] ||
+    request.auth?.employee.id === request.params["id"]
+  if (!request.auth || (!canReadAll && !isSelf)) {
+    return next(new AppError("Permissao insuficiente.", 403))
+  }
+  return next()
+}
+
+export function requireEmployeeUpdateAccess(
+  request: Request,
+  _response: Response,
+  next: NextFunction
+) {
+  const auth = request.auth
+  if (!auth) return next(new AppError("Permissao insuficiente.", 403))
+
+  if (auth.role === Role.ADMIN) return next()
+
+  if (Object.hasOwn(request.body ?? {}, "role")) {
+    return next(new AppError("Somente ADMIN pode alterar papéis.", 403))
+  }
+
+  if (auth.role === Role.GERENTE) return next()
+
+  const isSelf =
+    auth.employee.id === (request.params["id"] ?? auth.employee.id)
+  const isProfileOnly = Object.keys(request.body ?? {}).every((key) =>
+    ["name", "avatar"].includes(key)
+  )
+  if (isSelf && isProfileOnly) return next()
+  return next(new AppError("Permissao insuficiente.", 403))
 }
 
 export function allowKitchenStatusUpdate(
