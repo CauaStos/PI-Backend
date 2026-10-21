@@ -3,6 +3,10 @@ export declare const employeeRoleSchema: z.ZodEnum<{
     admin: "admin";
     garcom: "garcom";
     cozinha: "cozinha";
+    ADMIN: "ADMIN";
+    GERENTE: "GERENTE";
+    OPERADOR: "OPERADOR";
+    CLIENTE: "CLIENTE";
 }>;
 export type EmployeeRole = z.infer<typeof employeeRoleSchema>;
 export declare const employeeSchema: z.ZodObject<{
@@ -13,6 +17,10 @@ export declare const employeeSchema: z.ZodObject<{
         admin: "admin";
         garcom: "garcom";
         cozinha: "cozinha";
+        ADMIN: "ADMIN";
+        GERENTE: "GERENTE";
+        OPERADOR: "OPERADOR";
+        CLIENTE: "CLIENTE";
     }>;
     avatar: z.ZodString;
     createdAt: z.ZodString;
@@ -125,6 +133,10 @@ export declare const boardDataSchema: z.ZodObject<{
             admin: "admin";
             garcom: "garcom";
             cozinha: "cozinha";
+            ADMIN: "ADMIN";
+            GERENTE: "GERENTE";
+            OPERADOR: "OPERADOR";
+            CLIENTE: "CLIENTE";
         }>;
         avatar: z.ZodString;
         createdAt: z.ZodString;

@@ -1,7 +1,15 @@
 import { z } from "zod";
 import { moneySchema } from "./money.js";
 import { orderStatusSchema, tabStatusSchema } from "./status.js";
-export const employeeRoleSchema = z.enum(["admin", "garcom", "cozinha"]);
+export const employeeRoleSchema = z.enum([
+    "admin",
+    "garcom",
+    "cozinha",
+    "ADMIN",
+    "GERENTE",
+    "OPERADOR",
+    "CLIENTE",
+]);
 export const employeeSchema = z.object({
     id: z.string(),
     name: z.string(),
