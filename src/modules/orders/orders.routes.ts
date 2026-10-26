@@ -6,7 +6,8 @@ import { idParamSchema } from "../../shared/schemas.js"
 import { createOrderSchema, updateOrderSchema } from "./orders.schemas.js"
 import {
   allowKitchenStatusUpdate,
-  requireRoles,
+  requirePermission,
+  requireOrderUpdatePermission,
 } from "../auth/auth.middleware.js"
 
 const orderRoutes = Router()
@@ -62,7 +63,7 @@ const orderRoutes = Router()
  */
 orderRoutes.post(
   "/",
-  requireRoles("admin", "garcom"),
+  requirePermission("order.create"),
   validate({ body: createOrderSchema }),
   asyncHandler(orderController.create)
 )
@@ -84,7 +85,11 @@ orderRoutes.post(
  *               items:
  *                 $ref: '#/components/schemas/Order'
  */
-orderRoutes.get("/", asyncHandler(orderController.getOrders))
+orderRoutes.get(
+  "/",
+  requirePermission("order.read"),
+  asyncHandler(orderController.getOrders)
+)
 
 /**
  * @openapi
@@ -112,6 +117,7 @@ orderRoutes.get("/", asyncHandler(orderController.getOrders))
 orderRoutes.get(
   "/:id",
   validate({ params: idParamSchema }),
+  requirePermission("order.read"),
   asyncHandler(orderController.getOrderById)
 )
 
@@ -150,7 +156,7 @@ orderRoutes.get(
  */
 orderRoutes.patch(
   "/:id",
-  requireRoles("admin", "garcom", "cozinha"),
+  requireOrderUpdatePermission,
   allowKitchenStatusUpdate,
   validate({ body: updateOrderSchema, params: idParamSchema }),
   asyncHandler(orderController.update)
@@ -177,7 +183,7 @@ orderRoutes.patch(
  */
 orderRoutes.delete(
   "/:id",
-  requireRoles("admin"),
+  requirePermission("order.delete"),
   validate({ params: idParamSchema }),
   asyncHandler(orderController.delete)
 )

@@ -10,10 +10,10 @@ const routes = Router()
 
 routes.use(requireAuth)
 
+routes.use("/employees", employeeRoutes)
 routes.use("/products", productRoutes)
 routes.use("/orders", orderRoutes)
 routes.use("/tabs", tabRoutes)
-routes.use("/employees", employeeRoutes)
 routes.use("/songs", songRoutes)
 
 export default routes

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { asyncHandler } from "../../shared/async-handler.js"
 import productsController from "./products.controller.js"
-import { requireRoles } from "../auth/auth.middleware.js"
+import { requirePermission } from "../auth/auth.middleware.js"
 import { validate } from "../../shared/validate.js"
 import { idParamSchema } from "../../shared/schemas.js"
 import { createProductSchema, updateProductSchema } from "./products.schemas.js"
@@ -50,7 +50,7 @@ const productRoutes = Router()
  */
 productRoutes.post(
   "/",
-  requireRoles("admin"),
+  requirePermission("product.manage"),
   validate({ body: createProductSchema }),
   asyncHandler(productsController.create)
 )
@@ -72,7 +72,11 @@ productRoutes.post(
  *               items:
  *                 $ref: '#/components/schemas/Product'
  */
-productRoutes.get("/", asyncHandler(productsController.getProducts))
+productRoutes.get(
+  "/",
+  requirePermission("product.read"),
+  asyncHandler(productsController.getProducts)
+)
 
 /**
  * @openapi
@@ -103,6 +107,7 @@ productRoutes.get("/", asyncHandler(productsController.getProducts))
 productRoutes.get(
   "/:id",
   validate({ params: idParamSchema }),
+  requirePermission("product.read"),
   asyncHandler(productsController.getProductById)
 )
 
@@ -148,7 +153,7 @@ productRoutes.get(
  */
 productRoutes.patch(
   "/:id",
-  requireRoles("admin"),
+  requirePermission("product.manage"),
   validate({ body: updateProductSchema, params: idParamSchema }),
   asyncHandler(productsController.update)
 )
@@ -177,7 +182,7 @@ productRoutes.patch(
  */
 productRoutes.delete(
   "/:id",
-  requireRoles("admin"),
+  requirePermission("product.manage"),
   asyncHandler(productsController.delete)
 )
 

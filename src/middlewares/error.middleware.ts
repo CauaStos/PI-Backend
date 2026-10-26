@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express"
 import { Error as MongooseError } from "mongoose"
+import { APIError } from "better-auth/api"
 import { AppError } from "../shared/app-error.js"
 
 /**
@@ -18,6 +19,15 @@ export function errorMiddleware(
     return response.status(error.status).json({
       error: { message: error.message, status: error.status },
     })
+  }
+
+  // Erros do Better Auth (ex.: 403 do plugin admin) tem statusCode proprio.
+  // Sem isso viram 500 generico e mascaram a causa real.
+  if (error instanceof APIError) {
+    const status = error.statusCode ?? 500
+    const message =
+      (error.body as { message?: string } | undefined)?.message ?? error.message
+    return response.status(status).json({ error: { message, status } })
   }
 
   if (error instanceof MongooseError.ValidationError) {

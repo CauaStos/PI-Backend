@@ -1,7 +1,11 @@
 import { Router } from "express"
 import { asyncHandler } from "../../shared/async-handler.js"
 import employeeController from "./employees.controller.js"
-import { requireRoles } from "../auth/auth.middleware.js"
+import {
+  requireEmployeeReadAccess,
+  requireEmployeeUpdateAccess,
+  requirePermission,
+} from "../auth/auth.middleware.js"
 import { validate } from "../../shared/validate.js"
 import { idParamSchema } from "../../shared/schemas.js"
 import {
@@ -39,6 +43,7 @@ const employeeRoutes = Router()
  *               role:
  *                 type: string
  *                 example: garcom
+ *                 enum: [admin, garcom, cozinha, ADMIN, GERENTE, OPERADOR, CLIENTE]
  *               avatar:
  *                 type: string
  *                 example: https://avatar.url/joao.png
@@ -54,7 +59,7 @@ const employeeRoutes = Router()
  */
 employeeRoutes.post(
   "/",
-  requireRoles("admin"),
+  requirePermission("employee.create"),
   validate({ body: createEmployeeSchema }),
   asyncHandler(employeeController.create)
 )
@@ -76,7 +81,37 @@ employeeRoutes.post(
  *               items:
  *                 $ref: '#/components/schemas/Employee'
  */
-employeeRoutes.get("/", asyncHandler(employeeController.getEmployees))
+employeeRoutes.get(
+  "/",
+  requirePermission("employee.read"),
+  asyncHandler(employeeController.getEmployees)
+)
+
+employeeRoutes.get(
+  "/me",
+  requirePermission("employee.read_own"),
+  asyncHandler(employeeController.getEmployeeById)
+)
+employeeRoutes.patch(
+  "/me",
+  validate({ body: updateEmployeeSchema }),
+  requireEmployeeUpdateAccess,
+  asyncHandler(employeeController.update)
+)
+
+/**
+ * @openapi
+ * /employees/me:
+ *   get:
+ *     summary: Consulta o próprio perfil
+ *     tags:
+ *       - Funcionários
+ *     responses:
+ *       200:
+ *         description: Perfil do usuário autenticado
+ *       401:
+ *         description: Usuário não autenticado
+ */
 
 /**
  * @openapi
@@ -104,6 +139,7 @@ employeeRoutes.get("/", asyncHandler(employeeController.getEmployees))
 employeeRoutes.get(
   "/:id",
   validate({ params: idParamSchema }),
+  requireEmployeeReadAccess,
   asyncHandler(employeeController.getEmployeeById)
 )
 
@@ -131,6 +167,7 @@ employeeRoutes.get(
  *                 type: string
  *               role:
  *                 type: string
+ *                 enum: [admin, garcom, cozinha, ADMIN, GERENTE, OPERADOR, CLIENTE]
  *     responses:
  *       200:
  *         description: Funcionário atualizado com sucesso
@@ -143,8 +180,8 @@ employeeRoutes.get(
  */
 employeeRoutes.patch(
   "/:id",
-  requireRoles("admin"),
   validate({ body: updateEmployeeSchema, params: idParamSchema }),
+  requireEmployeeUpdateAccess,
   asyncHandler(employeeController.update)
 )
 
@@ -169,7 +206,7 @@ employeeRoutes.patch(
  */
 employeeRoutes.delete(
   "/:id",
-  requireRoles("admin"),
+  requirePermission("employee.delete"),
   validate({ params: idParamSchema }),
   asyncHandler(employeeController.delete)
 )

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { asyncHandler } from "../../shared/async-handler.js"
 import tabController from "./tabs.controller.js"
-import { requireRoles } from "../auth/auth.middleware.js"
+import { requirePermission } from "../auth/auth.middleware.js"
 import { validate } from "../../shared/validate.js"
 import { idParamSchema } from "../../shared/schemas.js"
 import { createTabSchema, updateTabSchema } from "./tabs.schemas.js"
@@ -39,7 +39,7 @@ const tabRoutes = Router()
  */
 tabRoutes.post(
   "/",
-  requireRoles("admin", "garcom"),
+  requirePermission("tab.create"),
   validate({ body: createTabSchema }),
   asyncHandler(tabController.create)
 )
@@ -61,7 +61,11 @@ tabRoutes.post(
  *               items:
  *                 $ref: '#/components/schemas/Tab'
  */
-tabRoutes.get("/", asyncHandler(tabController.getTabs))
+tabRoutes.get(
+  "/",
+  requirePermission("tab.read"),
+  asyncHandler(tabController.getTabs)
+)
 
 /**
  * @openapi
@@ -89,6 +93,7 @@ tabRoutes.get("/", asyncHandler(tabController.getTabs))
 tabRoutes.get(
   "/:id",
   validate({ params: idParamSchema }),
+  requirePermission("tab.read"),
   asyncHandler(tabController.getTabById)
 )
 
@@ -127,7 +132,7 @@ tabRoutes.get(
  */
 tabRoutes.patch(
   "/:id",
-  requireRoles("admin", "garcom"),
+  requirePermission("tab.update"),
   validate({ body: updateTabSchema, params: idParamSchema }),
   asyncHandler(tabController.update)
 )
@@ -153,7 +158,7 @@ tabRoutes.patch(
  */
 tabRoutes.delete(
   "/:id",
-  requireRoles("admin"),
+  requirePermission("tab.delete"),
   asyncHandler(tabController.delete)
 )
 

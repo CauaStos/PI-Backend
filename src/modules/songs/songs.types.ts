@@ -27,3 +27,7 @@ export interface ICreateSongDTO {
   title: string
   tab: string
 }
+
+export interface IUpdateSongPositionDTO {
+  position: number
+}

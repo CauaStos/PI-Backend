@@ -1,8 +1,38 @@
 import { AppError } from "../../shared/app-error.js"
 import { isTabOpen } from "../../shared/status.js"
+import { withTransaction } from "../../shared/with-transaction.js"
 import Tab from "../tabs/tabs.model.js"
 import Song from "./songs.model.js"
 import type { ICreateSongDTO } from "./songs.types.js"
+
+export function moveQueuedItem<T>(
+  items: readonly T[],
+  fromIndex: number,
+  targetPosition: number
+): T[] {
+  const toIndex = targetPosition - 1
+  if (
+    !Number.isInteger(targetPosition) ||
+    fromIndex < 0 ||
+    fromIndex >= items.length ||
+    toIndex < 0 ||
+    toIndex >= items.length
+  ) {
+    throw new AppError(
+      items.length === 0
+        ? "Nao ha musicas na fila para reordenar."
+        : `A posicao deve estar entre 1 e ${items.length}.`,
+      400
+    )
+  }
+
+  const next = [...items]
+  const [moved] = next.splice(fromIndex, 1)
+  if (moved !== undefined) {
+    next.splice(toIndex, 0, moved)
+  }
+  return next
+}
 
 class SongService {
   public async create(data: ICreateSongDTO) {
@@ -38,6 +68,54 @@ class SongService {
       status: 1,
       position: 1,
       requestedAt: 1,
+    })
+  }
+
+  public async updatePosition(id: string, position: number) {
+    return withTransaction(async (session) => {
+      const song = await Song.findById(id).session(session)
+      if (!song) throw new AppError("Musica nao encontrada.", 404)
+      if (song.status !== "queued") {
+        throw new AppError(
+          "Apenas musicas pendentes na fila podem ter sua posicao alterada.",
+          409
+        )
+      }
+
+      const queuedSongs = await Song.find({ status: "queued" })
+        .sort({ position: 1, requestedAt: 1 })
+        .session(session)
+
+      const currentIndex = queuedSongs.findIndex(
+        (item) => String(item._id) === String(song._id)
+      )
+      if (currentIndex === -1) {
+        throw new AppError(
+          "Apenas musicas pendentes na fila podem ter sua posicao alterada.",
+          409
+        )
+      }
+
+      const reordered = moveQueuedItem(queuedSongs, currentIndex, position)
+      await Promise.all(
+        reordered.map((item, index) =>
+          session
+            ? Song.updateOne(
+                { _id: item._id },
+                { position: index + 1 },
+                { session }
+              )
+            : Song.updateOne({ _id: item._id }, { position: index + 1 })
+        )
+      )
+
+      return Song.find({ status: { $in: ["playing", "queued"] } })
+        .sort({
+          status: 1,
+          position: 1,
+          requestedAt: 1,
+        })
+        .session(session)
     })
   }
 

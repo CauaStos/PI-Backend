@@ -18,6 +18,19 @@ class SongController {
     return response.status(200).json(songs)
   }
 
+  public async updatePosition(
+    request: Request,
+    response: Response
+  ): Promise<Response> {
+    const { position } = request.body as { position: number }
+    const queue = await songService.updatePosition(
+      String(request.params.id),
+      position
+    )
+    emitBoardChanged()
+    return response.status(200).json(queue)
+  }
+
   public async cancel(request: Request, response: Response): Promise<Response> {
     const song = await songService.cancel(String(request.params.id))
     emitBoardChanged()

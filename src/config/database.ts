@@ -11,6 +11,7 @@ class Database {
     }
 
     try {
+      console.log("MONGO_URI =", process.env.MONGO_URI);
       await mongoose.connect(mongoUri)
       console.log("Mongo conectado com sucesso")
     } catch (error) {

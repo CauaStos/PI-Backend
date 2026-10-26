@@ -1,10 +1,12 @@
 import { AppError } from "../../shared/app-error.js"
 import Employee from "./employees.model.js"
 import { auth } from "../../config/auth.js"
-import type {
-  ICreateEmployeeDTO,
-  IUpdateEmployeeDTO,
+import {
+  isAdminRole,
+  type ICreateEmployeeDTO,
+  type IUpdateEmployeeDTO,
 } from "./employees.types.js"
+import { Role } from "../../shared/enums/role.js"
 
 class EmployeeService {
   public async create(data: ICreateEmployeeDTO) {
@@ -21,7 +23,7 @@ class EmployeeService {
         email: data.email,
         password: data.password,
         name,
-        role: data.role === "admin" ? "admin" : "user",
+        role: data.role && isAdminRole(data.role) ? "admin" : "user",
         data: {
           employeeRole: data.role ?? "garcom",
           emailVerified: true,
@@ -64,26 +66,46 @@ class EmployeeService {
     if (!employee.authUserId) {
       throw new AppError("Funcionario nao possui conta vinculada.", 409)
     }
-    const { headers, actorUserId: _actorUserId, ...employeeData } = data
-    await auth.api.adminUpdateUser({
-      body: {
-        userId: employee.authUserId,
-        data: {
-          ...(data.name ? { name: data.name } : {}),
-          ...(data.email ? { email: data.email } : {}),
-          ...(data.role ? { employeeRole: data.role } : {}),
-        },
-      },
+    const {
       headers,
-    })
-    if (data.role) {
-      await auth.api.setRole({
+      actorUserId: _actorUserId,
+      actorRole,
+      ...employeeData
+    } = data
+    if (actorRole === Role.ADMIN) {
+      await auth.api.adminUpdateUser({
         body: {
           userId: employee.authUserId,
-          role: data.role === "admin" ? "admin" : "user",
+          data: {
+            ...(data.name ? { name: data.name } : {}),
+            ...(data.email ? { email: data.email } : {}),
+            ...(data.role ? { employeeRole: data.role } : {}),
+          },
         },
         headers,
       })
+      if (data.role) {
+        await auth.api.setRole({
+          body: {
+            userId: employee.authUserId,
+            role: isAdminRole(data.role) ? "admin" : "user",
+          },
+          headers,
+        })
+      }
+    } else {
+      if (data.email || data.role) {
+        throw new AppError(
+          "Somente ADMIN pode alterar email ou papel de outro funcionario.",
+          403
+        )
+      }
+      if (data.name) {
+        const context = await auth.$context
+        await context.internalAdapter.updateUser(employee.authUserId, {
+          name: data.name,
+        })
+      }
     }
     return Employee.findByIdAndUpdate(id, employeeData, {
       new: true,
@@ -106,8 +128,10 @@ class EmployeeService {
       throw new AppError("Voce nao pode remover sua propria conta.", 409)
     }
     if (
-      employee.role === "admin" &&
-      (await Employee.countDocuments({ role: "admin" })) <= 1
+      isAdminRole(employee.role) &&
+      (await Employee.countDocuments({
+        role: { $in: ["admin", Role.ADMIN] },
+      })) <= 1
     ) {
       throw new AppError("Nao e possivel remover o ultimo administrador.", 409)
     }
