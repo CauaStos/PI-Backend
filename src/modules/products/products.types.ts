@@ -1,3 +1,13 @@
+export const PRODUCT_CATEGORIES = [
+  "comida",
+  "bebida",
+  "porcao",
+  "sobremesa",
+  "outros",
+] as const
+
+export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number]
+
 export interface IProduct {
   name: string
   description?: string
@@ -5,6 +15,7 @@ export interface IProduct {
   /** Preco em unidades menores (inteiro, escala 10^4). Ex.: R$24,90 -> 249000. */
   price: number
   stock: number
+  category: ProductCategory
   createdAt?: Date
   updatedAt?: Date
 }
@@ -15,6 +26,7 @@ export interface ICreateProductDTO {
   description?: string
   image?: string
   stock?: number
+  category?: ProductCategory
 }
 
 export interface IUpdateProductDTO {
@@ -23,4 +35,5 @@ export interface IUpdateProductDTO {
   description?: string
   image?: string
   stock?: number
+  category?: ProductCategory
 }

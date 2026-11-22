@@ -51,10 +51,10 @@ async function seed(): Promise<void> {
   const ana = employees[3]!
 
   const products = await Product.create([
-    { name: "X-Bacon", price: toMinor(24.9), stock: 12 },
-    { name: "X-Salada", price: toMinor(21.9), stock: 8 },
-    { name: "Refrigerante", price: toMinor(7.5), stock: 32 },
-    { name: "Batata Frita", price: toMinor(18.0), stock: 15 },
+    { name: "X-Bacon", price: toMinor(24.9), stock: 12, category: "comida" },
+    { name: "X-Salada", price: toMinor(21.9), stock: 8, category: "comida" },
+    { name: "Refrigerante", price: toMinor(7.5), stock: 32, category: "bebida" },
+    { name: "Batata Frita", price: toMinor(18.0), stock: 15, category: "porcao" },
   ])
 
   const xBacon = products[0]!

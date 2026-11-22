@@ -1,5 +1,10 @@
 import { z } from "zod"
 import { moneySchema } from "@pi/contracts"
+import { PRODUCT_CATEGORIES } from "./products.types.js"
+
+const categorySchema = z.enum(PRODUCT_CATEGORIES, {
+  message: "Categoria invalida.",
+})
 
 export const createProductSchema = z.object({
   name: z
@@ -10,6 +15,7 @@ export const createProductSchema = z.object({
   description: z.string().optional(),
   image: z.string().optional(),
   stock: z.number().int().min(0).optional(),
+  category: categorySchema.optional(),
 })
 
 export const updateProductSchema = z
@@ -19,6 +25,7 @@ export const updateProductSchema = z
     description: z.string().optional(),
     image: z.string().optional(),
     stock: z.number().int().min(0).optional(),
+    category: categorySchema.optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "Nenhum campo para atualizar.",

@@ -277,6 +277,22 @@ npm run typecheck
 <<<<<<< HEAD
 A doc da API (swagger) fica em `/api-docs`. Os schemas de resposta são gerados direto do schemas do zod (`@pi/contracts`), então ele nunca dessincroniza.
 =======
+## Dashboard
+
+`GET /api/v1/dashboard` (permissão `dashboard.read`: `ADMIN` e `GERENTE`) devolve os indicadores do painel:
+
+| Campo | O que conta |
+| --- | --- |
+| `activeUsers` | Usuários com sessão válida (não expirada) no Better Auth, e o total de funcionários. |
+| `monthlySignups` | Funcionários cadastrados no mês corrente, no mês anterior e a série por dia. |
+| `pendingRecords` | Pedidos em preparo, comandas abertas/em andamento e músicas na fila. |
+| `byCategory` | Produtos cadastrados e itens vendidos (exceto cancelados) por categoria. |
+| `ordersLast7Days` | Pedidos por dia nos últimos 7 dias. |
+
+As datas seguem o horário de Brasília (UTC-3). A categoria do produto é um
+campo novo (`comida`, `bebida`, `porcao`, `sobremesa`, `outros`); produtos
+antigos sem categoria contam como `outros`.
+
 ## Swagger e teste rápido
 
 Com a API rodando, abre `http://localhost:3000/api-docs/`. Se mudou a porta do back, muda no endereço também. Os schemas de resposta vêm do Zod, que fica no `@pi/contracts`.

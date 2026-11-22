@@ -21,6 +21,7 @@ class ProductService {
       description: data.description ?? "",
       ...(data.image ? { image: data.image } : {}),
       stock: data.stock ?? 0,
+      category: data.category ?? "outros",
     })
   }
 

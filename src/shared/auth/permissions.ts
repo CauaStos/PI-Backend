@@ -22,6 +22,7 @@ export const Permission = {
   SONG_READ: "song.read",
   SONG_CREATE: "song.create",
   SONG_MANAGE: "song.manage",
+  DASHBOARD_READ: "dashboard.read",
 } as const
 
 export type Permission = (typeof Permission)[keyof typeof Permission]
@@ -36,6 +37,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     Permission.ORDER_READ,
     Permission.TAB_READ,
     Permission.SONG_READ,
+    Permission.DASHBOARD_READ,
   ],
   [Role.OPERADOR]: [
     Permission.EMPLOYEE_READ,
