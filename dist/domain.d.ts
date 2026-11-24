@@ -33,6 +33,13 @@ export declare const productSchema: z.ZodObject<{
     stock: z.ZodNumber;
     description: z.ZodOptional<z.ZodString>;
     image: z.ZodOptional<z.ZodString>;
+    category: z.ZodOptional<z.ZodEnum<{
+        comida: "comida";
+        bebida: "bebida";
+        porcao: "porcao";
+        sobremesa: "sobremesa";
+        outros: "outros";
+    }>>;
     createdAt: z.ZodString;
 }, z.core.$strip>;
 export type Product = z.infer<typeof productSchema>;
@@ -148,6 +155,13 @@ export declare const boardDataSchema: z.ZodObject<{
         stock: z.ZodNumber;
         description: z.ZodOptional<z.ZodString>;
         image: z.ZodOptional<z.ZodString>;
+        category: z.ZodOptional<z.ZodEnum<{
+            comida: "comida";
+            bebida: "bebida";
+            porcao: "porcao";
+            sobremesa: "sobremesa";
+            outros: "outros";
+        }>>;
         createdAt: z.ZodString;
     }, z.core.$strip>>;
     comandas: z.ZodArray<z.ZodObject<{

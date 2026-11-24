@@ -25,6 +25,7 @@ export const productSchema = z.object({
     stock: z.number().int().min(0),
     description: z.string().optional(),
     image: z.string().optional(),
+    category: z.enum(["comida", "bebida", "porcao", "sobremesa", "outros"]).optional(),
     createdAt: z.string().datetime(),
 });
 export const tabMemberSchema = z.object({
