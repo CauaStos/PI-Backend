@@ -5,13 +5,14 @@ import { emitBoardChanged } from "../../realtime/bus.js"
 
 class ProductController {
   public async create(request: Request, response: Response): Promise<Response> {
-    const { name, price, description, image, stock } = request.body
+    const { name, price, description, image, stock, category } = request.body
     const product = await productService.create({
       name,
       price,
       description,
       image,
       stock,
+      category,
     })
     emitBoardChanged()
     return response.status(201).json(product)
@@ -39,13 +40,14 @@ class ProductController {
 
   public async update(request: Request, response: Response): Promise<Response> {
     const { id } = request.params
-    const { name, price, description, image, stock } = request.body
+    const { name, price, description, image, stock, category } = request.body
     const product = await productService.update(String(id), {
       name,
       price,
       description,
       image,
       stock,
+      category,
     })
     emitBoardChanged()
     return response.status(200).json(product)

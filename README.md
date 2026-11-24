@@ -2,17 +2,6 @@
 
 API do OnStage: Express + MongoDB. Gerencia comandas, pedidos, produtos,
 funcionários e a fila de músicas.
-<<<<<<< HEAD
-
-## Requisitos
-
-- Node.js 22+
-- MongoDB 
-
-ou Docker pra subir tudo direto.
-
-## Para rodar
-=======
 
 O front-end fica no repositório [PI-Front](https://github.com/CauaStos/PI-Front).
 
@@ -27,7 +16,6 @@ Express, Mongoose, Better Auth e o resto das dependências vêm pelo npm.
 ## Variáveis de ambiente
 
 Antes de rodar, copie o arquivo de exemplo:
->>>>>>> 79d7d38fe957b126e77817530a603fcae2b3d43f
 
 ```bash
 cp .env.example .env
@@ -58,26 +46,16 @@ npm run build --workspace @pi/contracts
 npm run dev
 ```
 
-<<<<<<< HEAD
-ou, com docker:
-
-```bash
-docker compose up -d
-=======
 Com o Mongo rodando e o `.env` pronto, esses comandos instalam as dependências do lockfile, compilam o `@pi/contracts` e sobem a API. Esse pacote já fica no repo do back, não precisa baixar outro projeto.
 
 Ou, se for usar Docker, deixa o `.env` pronto e roda:
 
 ```bash
 docker compose up -d --build
->>>>>>> 79d7d38fe957b126e77817530a603fcae2b3d43f
 ```
 
 A API sobe em `http://localhost:3000` e as rotas ficam em `/api/v1`.
 
-<<<<<<< HEAD
-O healthcheck inicia o replica set sozinho na primeira subida, não precisa fazer nada.
-=======
 O Compose sobe o MongoDB 7 na porta `27017` e a API na `3000`, já com a conexão entre eles configurada. Ele também inicia o replica set sozinho. O Mongo precisa do replica set habilitado pra usar transações entre documentos. Ele tem apenas um membro, então não conta como backup.
 
 ## Deploy privado na tailnet (Tailscale Serve)
@@ -113,18 +91,13 @@ cookie de sessão, o CORS, o redirect do reset e o `iss`/`aud` do JWT ficam
 coerentes. O serviço roda com `NODE_ENV=development` e
 `AUTH_PASSWORD_RESET_CONSOLE_URL=true`, então o link de reset sai no
 `docker compose logs -f api` (não há SMTP).
->>>>>>> 79d7d38fe957b126e77817530a603fcae2b3d43f
-
 
 ## Dados de demonstração
 
-<<<<<<< HEAD
-=======
 O seed é opcional. **Ele apaga os pedidos, comandas, produtos e funcionários que já estão no banco** e preenche com dados de demonstração. Rode apenas num banco de teste e antes de criar o admin.
 
 Com o Mongo rodando, o `.env` pronto e as dependências instaladas:
 
->>>>>>> 79d7d38fe957b126e77817530a603fcae2b3d43f
 ```bash
 npm run seed
 ```
@@ -135,18 +108,11 @@ ou, com docker:
 docker compose run --rm seed
 ```
 
-<<<<<<< HEAD
-
-## Primeiro usuário
-
-Para criar o primeiro usuário, é só rodar 
-=======
 O script cria funcionários, produtos e comandas com pedidos para explorar as telas. Esses funcionários não vêm com senha. Para entrar no app, só seguir o próximo passo.
 
 ## Primeiro usuário
 
 Preenchidas as variáveis `BOOTSTRAP_ADMIN_*` e com o Mongo rodando, é só executar:
->>>>>>> 79d7d38fe957b126e77817530a603fcae2b3d43f
 
 ```bash
 npm run bootstrap-admin
@@ -158,18 +124,6 @@ ou, com docker:
 docker compose run --rm bootstrap-admin
 ```
 
-<<<<<<< HEAD
-O app não tem cadastro. Então o primeiro admin tem que ser criado usando o script de bootstrap. O script vai puxar as seguintes configurações do `.env`:
-
-```bash
-BETTER_AUTH_SECRET=um-secret-longo
-BOOTSTRAP_ADMIN_NAME=Administrador
-BOOTSTRAP_ADMIN_EMAIL=admin@exemplo.com
-BOOTSTRAP_ADMIN_PASSWORD=senha-de-pelo-menos-8-chars
-```
-
-Depois de rodar, é só logar no front com o email e senha.
-=======
 O primeiro admin é criado por esse script, porque o cadastro público (`/api/auth/sign-up/email`) cria apenas funcionários com papel `garcom`. Depois é só abrir `http://localhost:5173` e logar com o email e a senha que você colocou no `.env`.
 
 Se o admin já existe, pode rodar de novo que ele não duplica a conta. Não use esse script pra trocar a senha, porque ele não faz isso.
@@ -261,7 +215,6 @@ rotas de dados: `Authorization: Bearer ${data.token}`. O cookie não é aceito e
 `/api/v1`; ele serve apenas para refresh e para o socket.io. Como o token expira
 em 15 minutos e o reset/logout apagam a sessão, trate `401` chamando `token()`
 de novo (sessão ainda válida) e, se falhar, refaça o login.
->>>>>>> 79d7d38fe957b126e77817530a603fcae2b3d43f
 
 ## Scripts úteis
 
@@ -274,9 +227,22 @@ npm test
 npm run typecheck      
 ```
 
-<<<<<<< HEAD
-A doc da API (swagger) fica em `/api-docs`. Os schemas de resposta são gerados direto do schemas do zod (`@pi/contracts`), então ele nunca dessincroniza.
-=======
+## Dashboard
+
+`GET /api/v1/dashboard` (permissão `dashboard.read`: `ADMIN` e `GERENTE`) devolve os indicadores do painel:
+
+| Campo | O que conta |
+| --- | --- |
+| `activeUsers` | Usuários com sessão válida (não expirada) no Better Auth, e o total de funcionários. |
+| `monthlySignups` | Funcionários cadastrados no mês corrente, no mês anterior e a série por dia. |
+| `pendingRecords` | Pedidos em preparo, comandas abertas/em andamento e músicas na fila. |
+| `byCategory` | Produtos cadastrados e itens vendidos (exceto cancelados) por categoria. |
+| `ordersLast7Days` | Pedidos por dia nos últimos 7 dias. |
+
+As datas seguem o horário de Brasília (UTC-3). A categoria do produto é um
+campo novo (`comida`, `bebida`, `porcao`, `sobremesa`, `outros`); produtos
+antigos sem categoria contam como `outros`.
+
 ## Swagger e teste rápido
 
 Com a API rodando, abre `http://localhost:3000/api-docs/`. Se mudou a porta do back, muda no endereço também. Os schemas de resposta vêm do Zod, que fica no `@pi/contracts`.
@@ -293,4 +259,3 @@ npm run build --workspace @pi/contracts
 npm run typecheck
 npm test
 ```
->>>>>>> 79d7d38fe957b126e77817530a603fcae2b3d43f

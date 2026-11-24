@@ -8,6 +8,7 @@ import {
   tabSchema,
 } from "@pi/contracts"
 import swaggerJsdoc from "swagger-jsdoc"
+import { dashboardSchema } from "../modules/dashboard/dashboard.types.js"
 
 /**
  * Os schemas de resposta sao gerados dos zod schemas do @pi/contracts,
@@ -52,6 +53,7 @@ const componentSchemas = {
   Tab: tabSchema,
   Order: orderSchema,
   Song: songSchema,
+  Dashboard: dashboardSchema,
 } satisfies Record<string, z.ZodType>
 
 const schemas = Object.fromEntries(

@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose"
-import type { IProduct } from "./products.types.js"
+import { PRODUCT_CATEGORIES, type IProduct } from "./products.types.js"
 
 const productSchema = new Schema<IProduct>(
   {
@@ -26,6 +26,12 @@ const productSchema = new Schema<IProduct>(
         validator: Number.isInteger,
         message: "O preco deve ser um inteiro (unidades menores, escala 10^4).",
       },
+    },
+    category: {
+      type: String,
+      enum: PRODUCT_CATEGORIES,
+      required: true,
+      default: "outros",
     },
     stock: {
       type: Number,
