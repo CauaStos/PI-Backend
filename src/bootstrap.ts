@@ -3,6 +3,7 @@ import { createLocalAccountIssuer } from "better-auth"
 import { auth } from "./config/auth.js"
 import database from "./config/database.js"
 import Employee from "./modules/employees/employees.model.js"
+import { Role } from "./shared/enums/role.js"
 
 const email = process.env.BOOTSTRAP_ADMIN_EMAIL
 const password = process.env.BOOTSTRAP_ADMIN_PASSWORD
@@ -35,8 +36,8 @@ if (existingEmployee?.authUserId) {
         email: normalizedEmail,
         emailVerified: true,
         name,
-        role: "admin",
-        employeeRole: "admin",
+        role: "admin", // papel do plugin admin do Better Auth
+        employeeRole: Role.ADMIN,
       },
       { method: "admin" }
     ))
@@ -55,7 +56,7 @@ if (existingEmployee?.authUserId) {
       {
         name,
         email: normalizedEmail,
-        role: "admin",
+        role: Role.ADMIN,
         avatar: name.charAt(0).toUpperCase(),
         authUserId: user.id,
       },

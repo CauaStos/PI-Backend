@@ -13,6 +13,7 @@ import {
   isPasswordResetConsoleEnabled,
   validateAuthSecret,
 } from "./env.js"
+import { Role } from "../shared/enums/role.js"
 
 const mongoUri = process.env.MONGO_URI
 if (!mongoUri) throw new Error("MONGO_URI is required")
@@ -71,8 +72,8 @@ export const auth = betterAuth({
             data["email"] = user.email.trim().toLowerCase()
           }
           if (context?.path === "/sign-up/email") {
-            // Papel sempre servidor: o signup publico cria apenas garcom.
-            data["employeeRole"] = "garcom"
+            // Papel sempre servidor: o signup publico cria apenas OPERADOR.
+            data["employeeRole"] = Role.OPERADOR
           }
           return { data }
         },
@@ -84,7 +85,7 @@ export const auth = betterAuth({
               authUserId: user.id,
               name,
               email: user.email,
-              role: "garcom",
+              role: Role.OPERADOR,
               avatar: name.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase(),
             })
           } catch (error) {

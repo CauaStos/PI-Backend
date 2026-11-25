@@ -105,7 +105,7 @@ suite("auth de professor (integracao)", () => {
     }
   })
 
-  it("cadastro publico normaliza email e cria garcom vinculado", async () => {
+  it("cadastro publico normaliza email e cria OPERADOR vinculado", async () => {
     const response = await signUp("  Prof.MixCase@Example.com  ")
     expect(response.status).toBe(200)
     const body = (await response.json()) as { user: { id: string; email: string; role?: string } }
@@ -116,7 +116,7 @@ suite("auth de professor (integracao)", () => {
       .db(dbName)
       .collection("employees")
       .findOne({ email: "prof.mixcase@example.com" })
-    expect(employee?.role).toBe("garcom")
+    expect(employee?.role).toBe("OPERADOR")
     expect(employee?.authUserId).toBe(body.user.id)
   })
 
@@ -130,7 +130,7 @@ suite("auth de professor (integracao)", () => {
       .db(dbName)
       .collection("employees")
       .findOne({ email: "escalada@example.com" })
-    expect(employee?.role).toBe("garcom")
+    expect(employee?.role).toBe("OPERADOR")
     const user = await mongo.db(dbName).collection("user").findOne({ email: "escalada@example.com" })
     expect(user?.role ?? "user").not.toBe("admin")
   })

@@ -25,7 +25,7 @@ class EmployeeService {
         name,
         role: data.role && isAdminRole(data.role) ? "admin" : "user",
         data: {
-          employeeRole: data.role ?? "garcom",
+          employeeRole: data.role ?? Role.OPERADOR,
           emailVerified: true,
         },
       },
@@ -38,7 +38,7 @@ class EmployeeService {
         authUserId: account.user.id,
         name,
         email: data.email,
-        role: data.role ?? "garcom",
+        role: data.role ?? Role.OPERADOR,
         avatar: data.avatar?.trim() || name.charAt(0).toUpperCase(),
       })
     } catch (error) {
