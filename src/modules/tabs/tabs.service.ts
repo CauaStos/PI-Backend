@@ -6,6 +6,7 @@ import type { ClientSession } from "mongoose"
 import Employee from "../employees/employees.model.js"
 import Order from "../orders/orders.model.js"
 import Product from "../products/products.model.js"
+import Song from "../songs/songs.model.js"
 import Tab from "./tabs.model.js"
 import type {
   ICreateTabDTO,
@@ -73,7 +74,11 @@ class TabService {
       const tab = await Tab.findById(id).session(session)
       if (!tab) throw new AppError("Comanda nao encontrada.", 404)
 
-      const orders = await Order.find({ tab: tab._id }).session(session)
+      // So devolve estoque de comanda aberta: numa finalizada os itens foram vendidos
+      // (e numa cancelada o estoque ja voltou no cancelamento).
+      const orders = isTabOpen(tab.status)
+        ? await Order.find({ tab: tab._id }).session(session)
+        : []
       for (const order of orders) {
         if (order.status !== STATUS.CANCELLED) {
           const product = await Product.findById(order.product).session(session)
@@ -97,10 +102,9 @@ class TabService {
     nextStatus: TabStatus,
     session: ClientSession | null
   ): Promise<void> {
-    if (nextStatus === STATUS.FINISHED || nextStatus === STATUS.CANCELLED) {
-      if (!isTabOpen(tab.status)) {
-        throw new AppError("Comanda nao esta aberta para esta operacao.", 409)
-      }
+    // Comanda finalizada/cancelada e historico: nao reabre nem troca de estado.
+    if (!isTabOpen(tab.status)) {
+      throw new AppError("Comanda nao esta aberta para esta operacao.", 409)
     }
 
     const orders = await Order.find({ tab: tab._id }).session(session)
@@ -115,6 +119,7 @@ class TabService {
       }
       tab.status = STATUS.FINISHED
       tab.closedAt = new Date()
+      await this.dropQueuedSongs(tab, session)
       return
     }
 
@@ -132,10 +137,35 @@ class TabService {
       }
       tab.status = STATUS.CANCELLED
       tab.closedAt = new Date()
+      await this.dropQueuedSongs(tab, session)
       return
     }
 
     tab.status = nextStatus
+  }
+
+  /**
+   * A mesa foi embora: as musicas dela que ainda estavam na fila saem
+   * (canceladas) e a fila e renumerada. A que ja esta tocando termina normal.
+   */
+  private async dropQueuedSongs(
+    tab: HydratedDocument<ITab>,
+    session: ClientSession | null
+  ): Promise<void> {
+    const opts = session ? { session } : {}
+    await Song.updateMany(
+      { tab: tab._id, status: "queued" },
+      { status: "cancelled", position: null, cancelledAt: new Date() },
+      opts
+    )
+    const queue = await Song.find({ status: "queued" })
+      .sort({ position: 1, requestedAt: 1 })
+      .session(session)
+    await Promise.all(
+      queue.map((song, index) =>
+        Song.updateOne({ _id: song._id }, { position: index + 1 }, opts)
+      )
+    )
   }
 }
 
