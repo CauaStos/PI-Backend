@@ -11,14 +11,22 @@ const dashboardRoutes = Router()
  *   get:
  *     summary: Indicadores do dashboard
  *     description: >
- *       Fluxo de dinheiro (faturamento de hoje, 7 dias e mes, ticket medio,
- *       faturamento diario, por categoria, produto, funcionario e hora), musicas
- *       (tocadas, fila, espera media, mais pedidas, mesas que mais pedem) e
- *       operacao (comandas abertas, pedidos em preparo, permanencia media).
- *       Faturamento = pedidos nao cancelados de comandas finalizadas. Datas
- *       seguem UTC-3. Valores em unidades menores (escala 10^4).
+ *       Fluxo de dinheiro (faturamento da janela vs janela anterior, hoje,
+ *       ticket medio, por dia, categoria, produto, funcionario e hora), musicas
+ *       (tocadas, fila, espera media, pedidos por hora, mais pedidas, mesas que
+ *       mais pedem) e operacao (comandas abertas, pedidos em preparo,
+ *       permanencia media). Faturamento = pedidos nao cancelados de comandas
+ *       finalizadas. Datas seguem UTC-3. Valores em unidades menores (10^4).
  *     tags:
  *       - Dashboard
+ *     parameters:
+ *       - in: query
+ *         name: days
+ *         schema:
+ *           type: integer
+ *           enum: [7, 14, 30]
+ *           default: 7
+ *         description: Tamanho da janela em dias, terminando hoje
  *     responses:
  *       200:
  *         description: Indicadores calculados

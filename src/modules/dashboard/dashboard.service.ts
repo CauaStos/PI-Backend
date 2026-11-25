@@ -3,9 +3,9 @@ import Product from "../products/products.model.js"
 import Song from "../songs/songs.model.js"
 import Tab from "../tabs/tabs.model.js"
 import { STATUS } from "../../shared/status.js"
-import { currentMonthPeriod, lastDaysWindow } from "./dashboard.period.js"
 import {
   averageMinutes,
+  rangeWindows,
   summarizeMoney,
   summarizeSongs,
   type RevenueRow,
@@ -61,20 +61,16 @@ class DashboardService {
     ])
   }
 
-  public async get(now = new Date()): Promise<Dashboard> {
-    const month = currentMonthPeriod(now)
-    const last30 = lastDaysWindow(now, 30)
-    const last7 = lastDaysWindow(now, 7)
-    const revenueSince = new Date(
-      Math.min(month.previousStart.getTime(), last30.start.getTime())
-    )
-    const songsSince = new Date(
-      Math.min(month.start.getTime(), last7.start.getTime())
-    )
+  public async get(days: number, now = new Date()): Promise<Dashboard> {
+    const w = rangeWindows(now, days)
+    const finishedInWindow = {
+      status: STATUS.FINISHED,
+      closedAt: { $gte: w.start },
+    }
 
     const [
       revenueRows,
-      finishedTabsMonth,
+      finishedTabs,
       finishedTabSpans,
       songRows,
       queued,
@@ -82,20 +78,14 @@ class DashboardService {
       openTabs,
       ordersInProgress,
     ] = await Promise.all([
-      this.revenueRows(revenueSince),
-      Tab.countDocuments({
-        status: STATUS.FINISHED,
-        closedAt: { $gte: month.start },
-      }),
-      Tab.find(
-        { status: STATUS.FINISHED, closedAt: { $gte: month.start } },
-        { openedAt: 1, closedAt: 1 }
-      ).lean(),
+      this.revenueRows(w.previousStart),
+      Tab.countDocuments(finishedInWindow),
+      Tab.find(finishedInWindow, { openedAt: 1, closedAt: 1 }).lean(),
       Song.find(
         {
           $or: [
-            { requestedAt: { $gte: songsSince } },
-            { finishedAt: { $gte: songsSince } },
+            { requestedAt: { $gte: w.previousStart } },
+            { finishedAt: { $gte: w.previousStart } },
           ],
         },
         { title: 1, tabName: 1, status: 1, requestedAt: 1, startedAt: 1, finishedAt: 1 }
@@ -108,8 +98,9 @@ class DashboardService {
 
     return {
       generatedAt: now.toISOString(),
-      money: summarizeMoney(revenueRows, finishedTabsMonth, now),
-      songs: summarizeSongs(songRows, queued, playing?.title ?? null, now),
+      days,
+      money: summarizeMoney(revenueRows, finishedTabs, now, days),
+      songs: summarizeSongs(songRows, queued, playing?.title ?? null, now, days),
       operations: {
         openTabs,
         ordersInProgress,
