@@ -11,9 +11,12 @@ const dashboardRoutes = Router()
  *   get:
  *     summary: Indicadores do dashboard
  *     description: >
- *       Usuarios ativos (sessao valida), cadastros do mes, registros pendentes
- *       (pedidos em preparo, comandas abertas e musicas na fila) e quantidade
- *       de produtos/itens vendidos por categoria. Datas seguem UTC-3.
+ *       Fluxo de dinheiro (faturamento de hoje, 7 dias e mes, ticket medio,
+ *       faturamento diario, por categoria, produto, funcionario e hora), musicas
+ *       (tocadas, fila, espera media, mais pedidas, mesas que mais pedem) e
+ *       operacao (comandas abertas, pedidos em preparo, permanencia media).
+ *       Faturamento = pedidos nao cancelados de comandas finalizadas. Datas
+ *       seguem UTC-3. Valores em unidades menores (escala 10^4).
  *     tags:
  *       - Dashboard
  *     responses:
