@@ -76,6 +76,11 @@ export function lastDaysWindow(now: Date, days: number): DaysWindow {
   }
 }
 
+/** Hora local (0-23) de `date`. */
+export function localHour(date: Date): number {
+  return toLocalFields(date).getUTCHours()
+}
+
 /** Preenche com zero os dias sem registro, mantendo a ordem de `days`. */
 export function fillDailySeries(
   days: string[],

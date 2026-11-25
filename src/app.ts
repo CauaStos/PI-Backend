@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express"
 import { swaggerSpec } from "./docs/swagger.js"
 import { toNodeHandler } from "better-auth/node"
 import { auth } from "./config/auth.js"
+import { getTrustedOrigins } from "./config/env.js"
 
 class App {
   public server: Express
@@ -22,9 +23,8 @@ class App {
   private middleware(): void {
     this.server.use(
       cors({
-        origin: (process.env.FRONTEND_ORIGIN ?? "http://localhost:5173").split(
-          ","
-        ),
+        // Mesma lista (com trim) que o Better Auth usa em trustedOrigins.
+        origin: getTrustedOrigins(),
         credentials: true,
         methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
       })

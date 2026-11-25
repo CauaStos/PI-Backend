@@ -94,7 +94,7 @@ coerentes. O serviço roda com `NODE_ENV=development` e
 
 ## Dados de demonstração
 
-O seed é opcional. **Ele apaga os pedidos, comandas, produtos e funcionários que já estão no banco** e preenche com dados de demonstração. Rode apenas num banco de teste e antes de criar o admin.
+O seed é opcional. **Ele apaga tudo o que está no banco, inclusive as contas de login,** e preenche com dados de demonstração. Rode apenas num banco de teste.
 
 Com o Mongo rodando, o `.env` pronto e as dependências instaladas:
 
@@ -108,7 +108,14 @@ ou, com docker:
 docker compose run --rm seed
 ```
 
-O script cria funcionários, produtos e comandas com pedidos para explorar as telas. Esses funcionários não vêm com senha. Para entrar no app, só seguir o próximo passo.
+O script cria:
+
+- a equipe, já com login, todos em `@onstage.com`: `admin@` (ADMIN), `gerente@` (GERENTE) e os operadores `mariana@`, `ana@` e `caua@`. A senha de todos é `SEED_PASSWORD` (padrão `onstage2026`);
+- um cardápio com 14 produtos nas cinco categorias;
+- 30 dias de histórico até hoje (comandas finalizadas e algumas canceladas, com pedidos e músicas), mais movimento no fim de semana;
+- 4 comandas abertas agora, uma música tocando e três na fila.
+
+Os dados são gerados a partir da data de hoje, então o dashboard sempre tem números. Depois do seed não precisa rodar o bootstrap.
 
 ## Primeiro usuário
 
@@ -124,7 +131,7 @@ ou, com docker:
 docker compose run --rm bootstrap-admin
 ```
 
-O primeiro admin é criado por esse script, porque o cadastro público (`/api/auth/sign-up/email`) cria apenas funcionários com papel `garcom`. Depois é só abrir `http://localhost:5173` e logar com o email e a senha que você colocou no `.env`.
+Sem o seed, o primeiro admin é criado por esse script, porque o cadastro público (`/api/auth/sign-up/email`) cria apenas funcionários com papel `OPERADOR`. Depois é só abrir `http://localhost:5173` e logar com o email e a senha que você colocou no `.env`.
 
 Se o admin já existe, pode rodar de novo que ele não duplica a conta. Não use esse script pra trocar a senha, porque ele não faz isso.
 
@@ -229,19 +236,15 @@ npm run typecheck
 
 ## Dashboard
 
-`GET /api/v1/dashboard` (permissão `dashboard.read`: `ADMIN` e `GERENTE`) devolve os indicadores do painel:
+`GET /api/v1/dashboard?days=7|14|30` (permissão `dashboard.read`: `ADMIN` e `GERENTE`; padrão 7 dias) devolve os indicadores do painel para a janela escolhida, comparando com a janela anterior de mesmo tamanho:
 
 | Campo | O que conta |
 | --- | --- |
-| `activeUsers` | Usuários com sessão válida (não expirada) no Better Auth, e o total de funcionários. |
-| `monthlySignups` | Funcionários cadastrados no mês corrente, no mês anterior e a série por dia. |
-| `pendingRecords` | Pedidos em preparo, comandas abertas/em andamento e músicas na fila. |
-| `byCategory` | Produtos cadastrados e itens vendidos (exceto cancelados) por categoria. |
-| `ordersLast7Days` | Pedidos por dia nos últimos 7 dias. |
+| `money` | Faturamento da janela, da janela anterior e de hoje, ticket médio, série por dia, por categoria, top produtos, por funcionário e por hora do pedido. |
+| `songs` | Tocadas (janela, anterior e hoje), fila e música tocando agora, pedidas, canceladas, espera média, série por dia, pedidos por hora, mais pedidas e mesas que mais pedem. |
+| `operations` | Comandas abertas e pedidos em preparo agora, e permanência média das comandas finalizadas na janela. |
 
-As datas seguem o horário de Brasília (UTC-3). A categoria do produto é um
-campo novo (`comida`, `bebida`, `porcao`, `sobremesa`, `outros`); produtos
-antigos sem categoria contam como `outros`.
+Faturamento segue a mesma regra do histórico: pedidos não cancelados de comandas finalizadas, pela data de fechamento. Valores em dinheiro vêm em unidades menores (escala 10^4, ver `@pi/contracts`). As datas seguem o horário de Brasília (UTC-3). Produtos sem categoria contam como `outros`.
 
 ## Swagger e teste rápido
 
@@ -249,7 +252,7 @@ Com a API rodando, abre `http://localhost:3000/api-docs/`. Se mudou a porta do b
 
 As rotas de dados exigem `Authorization: Bearer <jwt>`. Sem token válido, você
 vai tomar `401`. O Swagger marca todas as rotas com o esquema `bearerAuth`.
-Depois de rodar o seed e o bootstrap, loga no front, abre uma comanda e adiciona
+Depois de rodar o seed (ou o bootstrap), loga no front, abre uma comanda e adiciona
 um pedido pra conferir o fluxo.
 
 Pra rodar os testes do back:

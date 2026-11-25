@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose"
 import { EMPLOYEE_ROLES, type IEmployee } from "./employees.types.js"
+import { Role } from "../../shared/enums/role.js"
 
 const employeeSchema = new Schema<IEmployee>(
   {
@@ -16,7 +17,7 @@ const employeeSchema = new Schema<IEmployee>(
       type: String,
       enum: EMPLOYEE_ROLES,
       required: true,
-      default: "garcom",
+      default: Role.OPERADOR,
     },
     avatar: { type: String, required: true, trim: true },
   },

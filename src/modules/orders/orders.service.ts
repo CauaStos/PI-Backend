@@ -110,6 +110,17 @@ class OrderService {
 
       const wantsProductChange =
         data.product !== undefined && data.product !== String(order.product)
+      const wantsQuantityChange =
+        data.quantity !== undefined && targetQuantity !== order.quantity
+
+      // Pedido cancelado ja devolveu o estoque; mexer em produto/quantidade
+      // nele desbalancearia o estoque.
+      if (
+        order.status === STATUS.CANCELLED &&
+        (wantsProductChange || wantsQuantityChange)
+      ) {
+        throw new AppError("Pedido cancelado nao pode ser alterado.", 409)
+      }
 
       if (wantsProductChange) {
         const oldProduct = await this.getProductOrThrow(
@@ -162,6 +173,18 @@ class OrderService {
       }
 
       if (data.status !== undefined && data.status !== order.status) {
+        const cancelling = data.status === STATUS.CANCELLED
+        const reviving = order.status === STATUS.CANCELLED
+        if (cancelling || reviving) {
+          const product = await Product.findById(order.product).session(session)
+          if (product) {
+            if (reviving && product.stock < order.quantity) {
+              throw new AppError("Quantidade maior que o estoque disponivel.", 409)
+            }
+            product.stock += cancelling ? order.quantity : -order.quantity
+            await product.save({ session })
+          }
+        }
         order.status = data.status
         if (data.status === STATUS.DELIVERED || data.status === STATUS.FINISHED) {
           order.deliveredAt = order.deliveredAt ?? new Date()
