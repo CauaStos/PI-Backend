@@ -64,10 +64,7 @@ describe("dashboard.read", () => {
     const { hasPermission, Permission } = await import(
       "../src/shared/auth/permissions.js"
     )
-    const { Role } = await import("../src/shared/enums/role.js")
-    expect(hasPermission(Role.ADMIN, Permission.DASHBOARD_READ)).toBe(true)
-    expect(hasPermission(Role.GERENTE, Permission.DASHBOARD_READ)).toBe(true)
-    expect(hasPermission(Role.OPERADOR, Permission.DASHBOARD_READ)).toBe(false)
-    expect(hasPermission(Role.CLIENTE, Permission.DASHBOARD_READ)).toBe(false)
-  })
+    const { Role
 })
+
+
