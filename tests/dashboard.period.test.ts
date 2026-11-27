@@ -71,9 +71,3 @@ describe("dashboard.read", () => {
     expect(hasPermission(Role.CLIENTE, Permission.DASHBOARD_READ)).toBe(false)
   })
 })
-
-describe("CI demo", () => {
-  it("falha intencionalmente para validar o CI da branch demo", () => {
-    expect(true).toBe(false)
-  })
-})
